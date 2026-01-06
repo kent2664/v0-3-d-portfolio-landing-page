@@ -1,11 +1,9 @@
 "use client"
 
-import { ThreeDBackground } from "./3d-background"
 
 export function Hero() {
   return (
     <section id="about" className="relative flex min-h-screen items-center justify-center px-6 py-20">
-      <ThreeDBackground />
 
       <div className="max-w-2xl text-center relative z-10">
         <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">Welcome</p>
