@@ -19,10 +19,10 @@ export function Navigation() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b border-muted bg-background/80 backdrop-blur-sm">
       <div className="mx-auto max-w-4xl px-6 py-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight">Alex Chen</h1>
+          <h1 className="text-xl font-bold tracking-tight">Kenta Yusa</h1>
           <div className="flex items-center gap-8">
             {sections.map((section) => (
               <button
