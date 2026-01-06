@@ -7,25 +7,44 @@ import * as THREE from "three"
 const vertexShader = `
   attribute float size;
   attribute float opacity;
+  attribute float depth;
   varying float vOpacity;
+  varying float vDepth;
+  
   void main() {
     vOpacity = opacity;
+    vDepth = depth;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    // 300.0 の値を大きくすると星が全体的に大きくなります
-    gl_PointSize = size * (300.0 / length(mvPosition.xyz)); 
+    // Perspective-based point sizing for depth illusion
+    gl_PointSize = size * (300.0 / length(mvPosition.xyz));
     gl_Position = projectionMatrix * mvPosition;
   }
-`;
+`
 
 const fragmentShader = `
   varying float vOpacity;
+  varying float vDepth;
   uniform vec3 color;
+  uniform vec3 backgroundColor;
+  
   void main() {
-    // 粒子を丸く描画する
-    if (length(gl_PointCoord - vec2(0.5, 0.5)) > 0.5) discard;
-    gl_FragColor = vec4(color, vOpacity);
+    // Create soft circular particle with anti-aliasing
+    vec2 center = gl_PointCoord - vec2(0.5, 0.5);
+    float dist = length(center);
+    if (dist > 0.5) discard;
+    
+    // Soft edge glow effect
+    float softEdge = 1.0 - smoothstep(0.4, 0.5, dist);
+    
+    // Depth fog: particles fade into background as they recede
+    float depthFog = mix(1.0, 0.1, clamp(vDepth / 500.0, 0.0, 1.0));
+    
+    // Combine glow and opacity
+    float finalAlpha = vOpacity * softEdge * depthFog;
+    
+    gl_FragColor = vec4(color, finalAlpha);
   }
-`;
+`
 
 const Starfield = () => {
   const ref = useRef<THREE.Points>(null)
@@ -35,6 +54,7 @@ const Starfield = () => {
   const sizesRef = useRef<Float32Array | null>(null)
   const velocitiesRef = useRef<Float32Array | null>(null)
   const opacitiesRef = useRef<Float32Array | null>(null)
+  const depthsRef = useRef<Float32Array | null>(null)
   const worldMousePosRef = useRef(new THREE.Vector3())
   const burstStateRef = useRef<{
     burstStartTime: number[]
@@ -56,9 +76,9 @@ const Starfield = () => {
 
   const spatialGridRef = useRef<Map<number, number[]>>(new Map())
   const { size, camera } = useThree()
-  const collisionRadius = 15
-  const particleCollisionRadius = 5
-  const gridCellSize = 10
+  const collisionRadius = 30
+  const particleCollisionRadius = 15
+  const gridCellSize = 50
   const [buffersReady, setBuffersReady] = useState(false)
 
   useEffect(() => {
@@ -72,35 +92,38 @@ const Starfield = () => {
   }, [])
 
   useEffect(() => {
-    const particleCount = 1000
+    const particleCount = 3000
     const positions = new Float32Array(particleCount * 3)
     const sizes = new Float32Array(particleCount)
     const velocities = new Float32Array(particleCount * 3)
     const opacities = new Float32Array(particleCount)
+    const depths = new Float32Array(particleCount)
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 200
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 200
-      positions[i * 3 + 2] = Math.random() * 400 - 200
+      positions[i * 3] = (Math.random() - 0.5) * 600
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 600
+      positions[i * 3 + 2] = Math.random() * 1000 - 500
 
-      sizes[i] = Math.random() * 0.5 + 0.1
+      sizes[i] = Math.random() * 1.5 + 0.3
 
       velocities[i * 3] = (Math.random() - 0.5) * 0.4
       velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.4
-      velocities[i * 3 + 2] = Math.random() * 0.2 + 0.08
+      velocities[i * 3 + 2] = Math.random() * 0.5 + 0.2
 
-      opacities[i] = Math.random() * 0.5 + 0.4
+      opacities[i] = Math.random() * 0.7 + 0.3
+      depths[i] = positions[i * 3 + 2]
     }
 
     positionsRef.current = positions
     sizesRef.current = sizes
     velocitiesRef.current = velocities
     opacitiesRef.current = opacities
+    depthsRef.current = depths
 
     const burstState = burstStateRef.current
     burstState.burstStartTime = new Array(particleCount).fill(-1)
     burstState.burstDuration = new Array(particleCount).fill(0)
-    burstState.originalSize = new Array(particleCount).fill(0).map(() => Math.random() * 0.5 + 0.1)
+    burstState.originalSize = new Array(particleCount).fill(0).map(() => Math.random() * 1.5 + 0.3)
     burstState.hasCollided = new Array(particleCount).fill(false)
     burstState.shimmerIntensity = new Array(particleCount).fill(0)
     burstState.shouldBurst = new Array(particleCount).fill(false)
@@ -112,7 +135,6 @@ const Starfield = () => {
     const gridX = Math.floor(x / gridCellSize)
     const gridY = Math.floor(y / gridCellSize)
     const gridZ = Math.floor(z / gridCellSize)
-    // Encode 3D coordinates into a single number using bit shifting
     return ((gridX & 0xfff) << 20) | ((gridY & 0xfff) << 10) | (gridZ & 0xfff)
   }
 
@@ -137,20 +159,21 @@ const Starfield = () => {
   }
 
   const respawnParticle = (positions: Float32Array, i: number) => {
-    positions[i * 3] = (Math.random() - 0.5) * 200
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 200
-    positions[i * 3 + 2] = 250
+    positions[i * 3] = (Math.random() - 0.5) * 600
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 600
+    positions[i * 3 + 2] = 500
   }
 
-  useFrame(() => {
+  useFrame((state) => {
     if (!ref.current || !positionsRef.current || !velocitiesRef.current) return
 
     const positions = positionsRef.current
     const velocities = velocitiesRef.current
     const sizes = sizesRef.current
+    const depths = depthsRef.current
     const particleCount = positions.length / 3
     const burstState = burstStateRef.current
-    const currentTime = Date.now() / 1000
+    const currentTime = state.clock.elapsedTime
 
     raycasterRef.current.setFromCamera(mouseRef.current, camera)
     raycasterRef.current.ray.at(50, worldMousePosRef.current)
@@ -164,10 +187,12 @@ const Starfield = () => {
       positions[i * 3] += velocities[i * 3]
       positions[i * 3 + 1] += velocities[i * 3 + 1]
 
-      if (positions[i * 3 + 2] < -200) {
+      if (positions[i * 3 + 2] < -500) {
         respawnParticle(positions, i)
         burstState.hasCollided[i] = false
       }
+
+      depths[i] = positions[i * 3 + 2]
 
       const gridKey = getGridKey(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
       if (!spatialGrid.has(gridKey)) {
@@ -237,9 +262,12 @@ const Starfield = () => {
         const timeSinceBurst = currentTime - burstState.burstStartTime[i]
         const burstProgress = Math.min(timeSinceBurst / burstState.burstDuration[i], 1)
 
+        // Ease-out curve for smooth deceleration
+        const easeOut = 1 - Math.pow(1 - burstProgress, 3)
+
         if (burstProgress < 1) {
           const shimmer = Math.sin(burstProgress * Math.PI * 4) * 0.5 + 0.5
-          sizes[i] = burstState.originalSize[i] * (1 + burstProgress * 30 + shimmer * 0.5)
+          sizes[i] = burstState.originalSize[i] * (1 + easeOut * 30 + shimmer * 0.5)
         } else {
           respawnParticle(positions, i)
           sizes[i] = burstState.originalSize[i]
@@ -259,6 +287,9 @@ const Starfield = () => {
     if (ref.current.geometry.attributes.opacity) {
       ref.current.geometry.attributes.opacity.needsUpdate = true
     }
+    if (ref.current.geometry.attributes.depth) {
+      ref.current.geometry.attributes.depth.needsUpdate = true
+    }
     ref.current.geometry.attributes.position.needsUpdate = true
 
     ref.current.rotation.x = mouseRef.current.y * 0.2
@@ -268,46 +299,53 @@ const Starfield = () => {
   if (!buffersReady) return null
 
   return (
-  <points ref={ref}>
-    <bufferGeometry>
-      <bufferAttribute
-        attach="attributes-position"
-        array={positionsRef.current!}
-        count={positionsRef.current!.length / 3}
-        itemSize={3}
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          array={positionsRef.current!}
+          count={positionsRef.current!.length / 3}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-size"
+          array={sizesRef.current!}
+          count={sizesRef.current!.length}
+          itemSize={1}
+        />
+        <bufferAttribute
+          attach="attributes-opacity"
+          array={opacitiesRef.current!}
+          count={opacitiesRef.current!.length}
+          itemSize={1}
+        />
+        <bufferAttribute
+          attach="attributes-depth"
+          array={depthsRef.current!}
+          count={depthsRef.current!.length}
+          itemSize={1}
+        />
+      </bufferGeometry>
+      <shaderMaterial
+        transparent={true}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+        fragmentShader={fragmentShader}
+        vertexShader={vertexShader}
+        uniforms={{
+          color: { value: new THREE.Color("#D5370B") },
+          backgroundColor: { value: new THREE.Color("#263044") },
+        }}
       />
-      <bufferAttribute
-        attach="attributes-size"
-        array={sizesRef.current!}
-        count={sizesRef.current!.length}
-        itemSize={1}
-      />
-      <bufferAttribute
-        attach="attributes-opacity"
-        array={opacitiesRef.current!}
-        count={opacitiesRef.current!.length}
-        itemSize={1}
-  　　　/>
-    </bufferGeometry>
-    <shaderMaterial
-      transparent={true}
-      blending={THREE.AdditiveBlending}
-      depthWrite={false}
-      fragmentShader={fragmentShader}
-      vertexShader={vertexShader}
-      uniforms={{
-        color: { value: new THREE.Color("#D5370B") },
-      }}
-    />
-  </points>
-　);
+    </points>
+  )
 }
 
 export function ThreeDBackground() {
   return (
     <div className="fixed inset-0 -z-10 h-screen w-screen overflow-hidden">
       <Canvas
-        camera={{ position: [0, 0, 50], fov: 75 }}
+        camera={{ position: [0, 0, 50], fov: 80 }}
         gl={{ antialias: true, alpha: true }}
         style={{ width: "100%", height: "100%" }}
       >
