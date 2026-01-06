@@ -57,12 +57,10 @@ const ParticleField = () => {
 
 export function ThreeDBackground() {
   return (
-    <div className="fixed inset-0 -z-10 h-screen w-screen">
+    <div className="fixed inset-0 z-0 h-screen w-screen">
       <Canvas
         camera={{ position: [0, 0, 1], fov: 75 }}
-        gl={{ antialias: true, alpha: true }}
-        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-      >
+        gl={{ antialias: true, alpha: true }}>
         <color attach="background" args={["#263044"]} />
         <ParticleField />
       </Canvas>
