@@ -76,8 +76,8 @@ const Starfield = () => {
 
   const spatialGridRef = useRef<Map<number, number[]>>(new Map())
   const { size, camera } = useThree()
-  const collisionRadius = 30
-  const particleCollisionRadius = 15
+  const collisionRadius = 8
+  const particleCollisionRadius = 1
   const gridCellSize = 50
   const [buffersReady, setBuffersReady] = useState(false)
 
@@ -104,13 +104,13 @@ const Starfield = () => {
       positions[i * 3 + 1] = (Math.random() - 0.5) * 600
       positions[i * 3 + 2] = Math.random() * 1000 - 500
 
-      sizes[i] = Math.random() * 1.5 + 0.3
+      sizes[i] = Math.random() * 3.0 + 0.6
 
       velocities[i * 3] = (Math.random() - 0.5) * 0.4
       velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.4
       velocities[i * 3 + 2] = Math.random() * 0.5 + 0.2
 
-      opacities[i] = Math.random() * 0.7 + 0.3
+      opacities[i] = Math.random() * 0.7 + 0.5
       depths[i] = positions[i * 3 + 2]
     }
 
@@ -123,7 +123,7 @@ const Starfield = () => {
     const burstState = burstStateRef.current
     burstState.burstStartTime = new Array(particleCount).fill(-1)
     burstState.burstDuration = new Array(particleCount).fill(0)
-    burstState.originalSize = new Array(particleCount).fill(0).map(() => Math.random() * 1.5 + 0.3)
+    burstState.originalSize = new Array(particleCount).fill(0).map(() => Math.random() * 3.0 + 0.6)
     burstState.hasCollided = new Array(particleCount).fill(false)
     burstState.shimmerIntensity = new Array(particleCount).fill(0)
     burstState.shouldBurst = new Array(particleCount).fill(false)
