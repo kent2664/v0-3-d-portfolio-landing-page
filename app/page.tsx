@@ -27,6 +27,7 @@ export default function Home() {
   return (
     <div className="min-h-screen text-foreground">
       <ThreeDBackground />
+      <div className="absolute inset-0 -z-8 bg-black/30" />
       <Navigation />
       <main className="mx-auto max-w-4xl">
         <Hero />
