@@ -1,6 +1,6 @@
 export function Contact() {
   return (
-    <section id="contact" className="px-6 py-20 border-t border-border">
+    <section id="contact" className="px-6 py-20 border-t border-[#664903]">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">Get In Touch</h2>
         <h3 className="mb-8 text-3xl font-bold">Let's Work Together</h3>
@@ -31,7 +31,7 @@ export function Contact() {
           </div>
         </div>
 
-        <div className="mt-20 border-t border-border pt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-20 border-t border-[#664903] pt-8 text-center text-sm text-muted-foreground">
           <p>© 2026 Alex Chen. All rights reserved.</p>
         </div>
       </div>

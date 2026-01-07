@@ -38,7 +38,7 @@ export function Projects() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   return (
-    <section id="projects" className="px-6 py-20 border-t border-border">
+    <section id="projects" className="px-6 py-20 border-t border-[#664903]">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">Featured Work</h2>
         <h3 className="mb-12 text-3xl font-bold">Selected Projects</h3>

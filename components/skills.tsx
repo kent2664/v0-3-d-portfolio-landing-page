@@ -15,7 +15,7 @@ const skillCategories = [
 
 export function Skills() {
   return (
-    <section id="skills" className="px-6 py-20 border-t border-border">
+    <section id="skills" className="px-6 py-20 border-t border-[#664903]">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">Skills & Tools</h2>
         <h3 className="mb-12 text-3xl font-bold">Technologies I Work With</h3>

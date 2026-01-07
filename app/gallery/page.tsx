@@ -12,7 +12,7 @@ export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category>("visuals")
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <Navigation />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <motion.div

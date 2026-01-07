@@ -75,6 +75,24 @@ export function Hero() {
                 </div>
               </div>
             </div>
+             {/* Passionate tech stack Card */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                    <span className="text-lg">🔥</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold text-foreground mb-2">Passionate Pathfinder</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Developed custom business automation tools and dashboards that streamlined workflows and increased
+                      team productivity by 40%.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
