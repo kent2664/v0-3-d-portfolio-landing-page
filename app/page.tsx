@@ -8,6 +8,7 @@ import { Contact } from "@/components/contact"
 import { Navigation } from "@/components/navigation"
 import { ThreeDBackground } from "@/components/3d-background"
 import { Loader } from "@/components/loader"
+import { GalleryIntro } from "@/components/gallery-intro"
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
@@ -33,6 +34,7 @@ export default function Home() {
         <Hero />
         <Projects />
         <Skills />
+        <GalleryIntro />
         <Contact />
       </main>
     </div>
