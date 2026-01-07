@@ -21,16 +21,16 @@ function InteractiveObject({ position, category, selectedCategory, onSelect, geo
   const [hovered, setHovered] = useState(false)
   const isSelected = selectedCategory === category
 
-  const targetScaleRef = useRef(isSelected ? 1.3 : 1.5)
+  const targetScaleRef = useRef(isSelected ? 1.3 : 1.65)
   const targetEmissiveRef = useRef(isSelected ? 1.0 : 0.2)
-  const currentScaleRef = useRef(isSelected ? 1.3 : 1.5)
+  const currentScaleRef = useRef(isSelected ? 1.3 : 1.65)
   const currentEmissiveRef = useRef(isSelected ? 1.0 : 0.2)
 
   useFrame((state) => {
     if (groupRef.current) {
       groupRef.current.rotation.y += 0.003
 
-      targetScaleRef.current = isSelected ? 1.3 : hovered ? 1.65 : 1.5
+      targetScaleRef.current = isSelected ? 1.65 : hovered ? 1.65 : 1.5
       targetEmissiveRef.current = isSelected ? 1.0 : hovered ? 0.5 : 0.2
 
       currentScaleRef.current += (targetScaleRef.current - currentScaleRef.current) * 0.12
