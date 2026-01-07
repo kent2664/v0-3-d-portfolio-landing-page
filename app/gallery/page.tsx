@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Gallery3DNav } from "@/components/gallery-3d-nav"
 import { GalleryContent } from "@/components/gallery-content"
@@ -8,11 +8,22 @@ import { motion } from "framer-motion"
 
 type Category = "visuals" | "artifact" | "compose"
 
+function CanvasLoadingFallback() {
+  return (
+    <div className="relative h-[400px] w-full overflow-hidden rounded-lg bg-background/20 backdrop-blur-md flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <p className="text-sm text-muted-foreground">Loading 3D Gallery...</p>
+      </div>
+    </div>
+  )
+}
+
 export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category>("visuals")
 
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen bg-[#1d2533] text-foreground">
       <Navigation />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <motion.div
@@ -25,7 +36,9 @@ export default function GalleryPage() {
           <p className="text-lg text-muted-foreground">Explore my work across multiple creative disciplines</p>
         </motion.div>
 
-        <Gallery3DNav onCategoryChange={setSelectedCategory} />
+        <Suspense fallback={<CanvasLoadingFallback />}>
+          <Gallery3DNav onCategoryChange={setSelectedCategory} />
+        </Suspense>
         <GalleryContent category={selectedCategory} />
       </main>
     </div>
