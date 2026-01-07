@@ -1,3 +1,7 @@
+"use client"
+
+import { useState } from "react"
+
 const projects = [
   {
     title: "E-Commerce Platform",
@@ -31,35 +35,53 @@ const projects = [
 ]
 
 export function Projects() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+
   return (
     <section id="projects" className="px-6 py-20 border-t border-border">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">Featured Work</h2>
         <h3 className="mb-12 text-3xl font-bold">Selected Projects</h3>
 
-        <div className="space-y-12">
+        <div className="grid grid-cols-1 gap-6">
           {projects.map((project, idx) => (
             <a
               key={idx}
               href={project.link}
-              className="group block border-b border-border pb-8 transition-all hover:pb-6 last:border-0"
+              onMouseEnter={() => setHoveredIndex(idx)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              className="group relative"
             >
-              <div className="flex items-start justify-between gap-6">
-                <div className="flex-1">
-                  <h4 className="mb-2 text-xl font-bold group-hover:text-accent transition-colors">{project.title}</h4>
-                  <p className="mb-4 text-muted-foreground leading-relaxed">{project.description}</p>
+              {/* Glow effect on hover */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl transition-opacity duration-300 ${
+                  hoveredIndex === idx ? "opacity-100" : "opacity-0"
+                }`}
+              />
+
+              {/* Card */}
+              <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-6 transition-all duration-300 transform hover:scale-105 hover:border-accent/30">
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h4 className="text-lg font-bold group-hover:text-accent transition-colors">{project.title}</h4>
+                    </div>
+                    <div className="whitespace-nowrap text-xs font-medium text-accent opacity-75">{project.year}</div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground leading-relaxed">{project.description}</p>
+
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground"
+                        className="inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent border border-accent/20 group-hover:border-accent/40 transition-colors"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
                 </div>
-                <div className="whitespace-nowrap text-sm text-muted-foreground">{project.year}</div>
               </div>
             </a>
           ))}
