@@ -17,7 +17,7 @@ const vertexShader = `
     vDepth = depth;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     // Perspective-based point sizing for depth illusion
-    gl_PointSize = size * (300.0 / length(mvPosition.xyz));
+    gl_PointSize = size * (400.0 / length(mvPosition.xyz));
     gl_Position = projectionMatrix * mvPosition;
   }
 `
@@ -334,7 +334,7 @@ const Starfield = () => {
         fragmentShader={fragmentShader}
         vertexShader={vertexShader}
         uniforms={{
-          color: { value: new THREE.Color("#D5370B") },
+          color: { value: new THREE.Color("#ff7231") },
           backgroundColor: { value: new THREE.Color("#263044") },
         }}
       />
