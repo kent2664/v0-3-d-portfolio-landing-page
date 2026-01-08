@@ -1,5 +1,5 @@
 "use client"
-
+import { Suspense } from "react"
 import { useRef, useState } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows } from "@react-three/drei"
@@ -23,7 +23,7 @@ function InteractiveObject({ position, category, selectedCategory, onSelect, geo
 
   const targetScaleRef = useRef(isSelected ? 1.3 : 1.65)
   const targetEmissiveRef = useRef(isSelected ? 1.0 : 0.2)
-  const currentScaleRef = useRef(isSelected ? 1.3 : 1.65)
+  const currentScaleRef = useRef(1.5)
   const currentEmissiveRef = useRef(isSelected ? 1.0 : 0.2)
 
   useFrame((state) => {
@@ -59,6 +59,7 @@ function InteractiveObject({ position, category, selectedCategory, onSelect, geo
     <group
       ref={groupRef}
       position={position}
+      scale={[1.5, 1.5, 1.5]}
       onClick={() => onSelect(category)}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
@@ -280,6 +281,7 @@ export function Gallery3DNav({ onCategoryChange }: Gallery3DNavProps) {
       className="relative h-[400px] w-full overflow-hidden rounded-lg bg-background/20 backdrop-blur-md"
     >
       <Canvas shadows dpr={[1, 1.5]}>
+        <Suspense fallback={null}>
         <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={50} />
         <OrbitControls enableZoom={false} enablePan={false} />
 
@@ -318,6 +320,7 @@ export function Gallery3DNav({ onCategoryChange }: Gallery3DNavProps) {
             geometry={cat.geometry}
           />
         ))}
+        </Suspense>
       </Canvas>
 
       <div className="pointer-events-none absolute bottom-8 left-0 right-0 flex justify-center gap-8">
