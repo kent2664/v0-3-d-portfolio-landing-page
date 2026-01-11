@@ -30,12 +30,12 @@ const projects = [
     image: "/analytics-dashboard-charts.png",
   },
   {
-    title: "Design System",
+    title: "Terrible Website contest",
     description: "Comprehensive component library with documentation, supporting 50+ production applications.",
-    tags: ["React", "Storybook", "TypeScript", "CSS-in-JS"],
-    link: "#",
-    year: "2022",
-    image: "/design-system-components.png",
+    tags: ["Html", "Javascript","tailwind"],
+    link: "https://github.com/kent2664/terrible-website-contest",
+    year: "2025",
+    image: "/terrible-website.png",
   },
 ]
 
@@ -56,6 +56,7 @@ export function Projects() {
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}
               className="group relative"
+              target="_blank"
             >
               {/* Glow effect on hover */}
               <div
