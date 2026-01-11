@@ -11,7 +11,7 @@ const projects = [
     tags: ["React", "Node.js", "Javascript","Tailwind"],
     link: "https://github.com/kent2664/course-hub-react-app",
     year: "2025",
-    image: "/ecommerce-dashboard.png",
+    image: "/course-hub_Image.png",
   },
   {
     title: "Task Management App",
