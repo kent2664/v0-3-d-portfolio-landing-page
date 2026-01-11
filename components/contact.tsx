@@ -21,8 +21,8 @@ export function Contact() {
               Send Email
             </a>
             <a
-              href="/KentaYusa_Resume.pdf"
-              download
+              href=""
+              download="KentaYusa_Resume.pdf"
               className="inline-flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-6 py-3 font-medium text-accent transition-colors hover:bg-accent/20 hover:border-accent/50"
             >
               <Download className="h-4 w-4" />
