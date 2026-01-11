@@ -16,7 +16,7 @@ export function Contact() {
           <div className="flex flex-col gap-4 sm:flex-row">
             <a
               href="mailto:onz0shi2664@gmail.com"
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90"　target="_blank"
             >
               Send Email
             </a>
@@ -32,10 +32,10 @@ export function Contact() {
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="https://github.com/kent2664" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="GitHub">
+            <a href="https://github.com/kent2664" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="GitHub"　target="_blank">
               GitHub
             </a>
-            <a href="https://www.linkedin.com/in/kenta-yusa2664/" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com/in/kenta-yusa2664/" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="LinkedIn"　target="_blank">
               LinkedIn
             </a>
           </div>

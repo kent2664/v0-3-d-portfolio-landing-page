@@ -5,12 +5,12 @@ import Image from "next/image"
 
 const projects = [
   {
-    title: "E-Commerce Platform",
+    title: "Online Course-hub Platform",
     description:
       "Full-stack marketplace with real-time inventory management, payment processing, and seller dashboard.",
-    tags: ["React", "Node.js", "PostgreSQL", "Stripe"],
-    link: "#",
-    year: "2024",
+    tags: ["React", "Node.js", "Javascript","Tailwind"],
+    link: "https://github.com/kent2664/course-hub-react-app",
+    year: "2025",
     image: "/ecommerce-dashboard.png",
   },
   {
