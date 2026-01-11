@@ -15,14 +15,15 @@ export function Contact() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="flex flex-col gap-4 sm:flex-row">
             <a
-              href="mailto:hello@example.com"
+              href="mailto:onz0shi2664@gmail.com"
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
             >
               Send Email
             </a>
             <a
-              href=""
+              href="https://drive.google.com/file/d/1DFb8hga8HNodI8-EHrZtWLei3rTMIAU1/view?usp=sharing"
               download="KentaYusa_Resume.pdf"
+              target="_blank"
               className="inline-flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-6 py-3 font-medium text-accent transition-colors hover:bg-accent/20 hover:border-accent/50"
             >
               <Download className="h-4 w-4" />
@@ -31,14 +32,11 @@ export function Contact() {
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="#" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="GitHub">
+            <a href="https://github.com/kent2664" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="GitHub">
               GitHub
             </a>
-            <a href="#" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com/in/kenta-yusa2664/" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="LinkedIn">
               LinkedIn
-            </a>
-            <a href="#" className="text-muted-foreground transition-colors hover:text-foreground" aria-label="Twitter">
-              Twitter
             </a>
           </div>
         </div>
