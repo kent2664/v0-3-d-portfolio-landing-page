@@ -30,7 +30,7 @@ export function Hero() {
         <div className="mt-20 space-y-6 pt-12">
           <div className="space-y-4">
             <p className="text-muted-foreground leading-relaxed">
-              I'm a passionate full-stack developer with 6+ years of experience building scalable web applications. I
+              I'm a passionate full-stack developer with 10+ years of experience building scalable web applications. I
               love the intersection of design and engineering, creating experiences that are both beautiful and
               functional.
             </p>
@@ -68,8 +68,7 @@ export function Hero() {
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold text-foreground mb-2">Internal Tools Developer</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Developed custom business automation tools and dashboards that streamlined workflows and increased
-                      team productivity by 40%.
+                      Developed a task management tool to automate repetitive monthly tasks, significantly streamlining the order processing workflow.
                     </p>
                   </div>
                 </div>
@@ -87,8 +86,7 @@ export function Hero() {
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold text-foreground mb-2">Passionate Pathfinder</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Developed custom business automation tools and dashboards that streamlined workflows and increased
-                      team productivity by 40%.
+                      Not only am I dedicated to my professional responsibilities, but I also actively explore new technologies outside of work, striving to remain a lifelong creative.
                     </p>
                   </div>
                 </div>
