@@ -21,7 +21,7 @@ export function Hero() {
           </a>
           <a
             href="#contact"
-            className="rounded-lg border border-muted px-8 py-3 font-medium transition-colors hover:bg-muted"
+            className="rounded-lg border-2 border-accent/40 bg-accent/5 px-8 py-3 font-medium text-foreground transition-all hover:bg-accent/10 hover:border-accent/60"
           >
             Get In Touch
           </a>
@@ -75,7 +75,8 @@ export function Hero() {
                 </div>
               </div>
             </div>
-             {/* Passionate tech stack Card */}
+
+            {/* Passionate tech stack Card */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">

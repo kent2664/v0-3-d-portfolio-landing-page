@@ -16,8 +16,12 @@ const vertexShader = `
     vOpacity = opacity;
     vDepth = depth;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    // Perspective-based point sizing for depth illusion
-    gl_PointSize = size * (400.0 / length(mvPosition.xyz));
+    
+    float perspectiveScale = 400.0 / length(mvPosition.xyz);
+    // Additional depth-based scaling to make vanishing point more pronounced
+    float depthScale = 1.0 - clamp((500.0 + vDepth) / 1000.0, 0.0, 0.85);
+    gl_PointSize = size * perspectiveScale * (0.15 + depthScale);
+    
     gl_Position = projectionMatrix * mvPosition;
   }
 `
@@ -29,19 +33,19 @@ const fragmentShader = `
   uniform vec3 backgroundColor;
   
   void main() {
-    // Create soft circular particle with anti-aliasing
     vec2 center = gl_PointCoord - vec2(0.5, 0.5);
     float dist = length(center);
     if (dist > 0.5) discard;
     
-    // Soft edge glow effect
     float softEdge = 1.0 - smoothstep(0.4, 0.5, dist);
     
-    // Depth fog: particles fade into background as they recede
-    float depthFog = mix(1.0, 0.1, clamp(vDepth / 500.0, 0.0, 1.0));
+    // Particles fade much more aggressively as they recede into distance
+    float depthFog = mix(1.0, 0.05, clamp((500.0 + vDepth) / 1000.0, 0.0, 0.95));
     
-    // Combine glow and opacity
-    float finalAlpha = vOpacity * softEdge * depthFog;
+    // Additional dimming for far particles to create "infinite" feeling
+    float distanceDim = 1.0 - smoothstep(-400.0, -500.0, vDepth);
+    
+    float finalAlpha = vOpacity * softEdge * depthFog * distanceDim;
     
     gl_FragColor = vec4(color, finalAlpha);
   }
@@ -342,6 +346,250 @@ const Starfield = () => {
   )
 }
 
+const Satellite = () => {
+  const groupRef = useRef<THREE.Group>(null)
+  const hitboxRef = useRef<THREE.Mesh>(null)
+  const [orbitAngle, setOrbitAngle] = useState(0)
+  const [isDestroyed, setIsDestroyed] = useState(false)
+  const healthRef = useRef(100)
+  const [visualHealth, setVisualHealth] = useState(100)
+  const isHoveringRef = useRef(false)
+  const [damageRedTint, setDamageRedTint] = useState(0)
+  const debrisRef = useRef<Array<{ position: THREE.Vector3; velocity: THREE.Vector3; life: number }>>([])
+
+  const handlePointerOver = () => {
+    isHoveringRef.current = true
+  }
+
+  const handlePointerOut = () => {
+    isHoveringRef.current = false
+  }
+
+  useFrame((state) => {
+    if (!groupRef.current) return
+
+    if (isHoveringRef.current && !isDestroyed && healthRef.current > 0) {
+      healthRef.current = Math.max(healthRef.current - 10 * state.clock.deltaTime, 0)
+      setVisualHealth(healthRef.current)
+
+      const damageProgress = 1 - healthRef.current / 100
+      setDamageRedTint(damageProgress * 0.8)
+
+      if (healthRef.current <= 0 && !isDestroyed) {
+        setIsDestroyed(true)
+        for (let i = 0; i < 20; i++) {
+          const theta = Math.random() * Math.PI * 2
+          const phi = Math.random() * Math.PI
+          const speed = 4 + Math.random() * 3
+          debrisRef.current.push({
+            position: groupRef.current.position.clone(),
+            velocity: new THREE.Vector3(
+              Math.sin(phi) * Math.cos(theta) * speed,
+              Math.sin(phi) * Math.sin(theta) * speed,
+              Math.cos(phi) * speed,
+            ),
+            life: 2,
+          })
+        }
+
+        setTimeout(() => {
+          healthRef.current = 100
+          setVisualHealth(100)
+          setIsDestroyed(false)
+          setDamageRedTint(0)
+          debrisRef.current = []
+        }, 2000)
+      }
+    } else {
+      setDamageRedTint((prev) => Math.max(prev - state.clock.deltaTime * 1.5, 0))
+    }
+
+    debrisRef.current = debrisRef.current.filter((debris) => {
+      debris.life -= state.clock.deltaTime
+      debris.position.add(debris.velocity.clone().multiplyScalar(state.clock.deltaTime))
+      debris.velocity.multiplyScalar(0.97)
+      return debris.life > 0
+    })
+
+    groupRef.current.scale.set(0.8, 0.8, 0.8)
+
+    if (!isDestroyed) {
+      const newAngle = orbitAngle + 0.0005
+      setOrbitAngle(newAngle)
+
+      const orbitRadius = 300
+      groupRef.current.position.x = Math.cos(newAngle) * orbitRadius
+      groupRef.current.position.y = Math.sin(newAngle * 0.5) * 80
+      groupRef.current.position.z = -150
+
+      groupRef.current.rotation.x += 0.0005
+      groupRef.current.rotation.y += 0.001
+      groupRef.current.rotation.z += 0.0003
+
+      if (damageRedTint > 0) {
+        const jitterIntensity = damageRedTint * 2
+        groupRef.current.position.x += (Math.random() - 0.5) * jitterIntensity
+        groupRef.current.position.y += (Math.random() - 0.5) * jitterIntensity
+      }
+    } else {
+      const destroyProgress = Math.min((state.clock.elapsedTime % 2) / 2, 1)
+      const shrinkScale = 0.8 * (1 - destroyProgress)
+      groupRef.current.scale.set(shrinkScale, shrinkScale, shrinkScale)
+    }
+  })
+
+  if (isDestroyed) {
+    return null
+  }
+
+  const damageProgress = 1 - visualHealth / 100
+  const emissiveIntensity = damageProgress * 0.5
+
+  return (
+    <group ref={groupRef}>
+      <mesh ref={hitboxRef} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} visible={false}>
+        <sphereGeometry args={[12, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+
+      <mesh>
+        <boxGeometry args={[6, 3.5, 3.5]} />
+        <meshPhysicalMaterial
+          color={`#${Math.round(139 + damageRedTint * 116)
+            .toString(16)
+            .padStart(2, "0")}${Math.round(134 + damageRedTint * 122)
+            .toString(16)
+            .padStart(2, "0")}${Math.round(128 + damageRedTint * 127)
+            .toString(16)
+            .padStart(2, "0")}`}
+          metalness={0.95}
+          roughness={0.25}
+          clearcoat={0.8}
+          clearcoatRoughness={0.2}
+          emissive="#ff3333"
+          emissiveIntensity={emissiveIntensity}
+        />
+      </mesh>
+
+      <group position={[-5, 0, 0]}>
+        <mesh position={[-8, 0, 0]}>
+          <boxGeometry args={[16, 0.1, 7]} />
+          <meshPhysicalMaterial
+            color="#0d1b2a"
+            metalness={0.7}
+            roughness={0.35}
+            emissive="#ff2222"
+            emissiveIntensity={emissiveIntensity * 0.3}
+          />
+        </mesh>
+        {[...Array(4)].map((_, i) => (
+          <mesh key={`solar-left-${i}`} position={[-8 + i * 4, 0.15, 0]}>
+            <boxGeometry args={[3.5, 0.05, 6.5]} />
+            <meshPhysicalMaterial
+              color="#1a3a4f"
+              metalness={0.6}
+              roughness={0.2}
+              emissive="#ff1111"
+              emissiveIntensity={emissiveIntensity * 0.2}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      <group position={[5, 0, 0]}>
+        <mesh position={[8, 0, 0]}>
+          <boxGeometry args={[16, 0.1, 7]} />
+          <meshPhysicalMaterial
+            color="#0d1b2a"
+            metalness={0.7}
+            roughness={0.35}
+            emissive="#ff2222"
+            emissiveIntensity={emissiveIntensity * 0.3}
+          />
+        </mesh>
+        {[...Array(4)].map((_, i) => (
+          <mesh key={`solar-right-${i}`} position={[8 - i * 4, 0.15, 0]}>
+            <boxGeometry args={[3.5, 0.05, 6.5]} />
+            <meshPhysicalMaterial
+              color="#1a3a4f"
+              metalness={0.6}
+              roughness={0.2}
+              emissive="#ff1111"
+              emissiveIntensity={emissiveIntensity * 0.2}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      <group position={[0, 2.5, 0]}>
+        <mesh position={[-1.5, 0, 0]}>
+          <cylinderGeometry args={[0.15, 0.15, 8, 12]} />
+          <meshPhysicalMaterial
+            color="#d4af37"
+            metalness={0.92}
+            roughness={0.15}
+            clearcoat={0.7}
+            clearcoatRoughness={0.3}
+          />
+        </mesh>
+        <mesh position={[1.5, 0, 0]}>
+          <cylinderGeometry args={[0.1, 0.1, 6.5, 12]} />
+          <meshPhysicalMaterial
+            color="#c0a028"
+            metalness={0.9}
+            roughness={0.18}
+            clearcoat={0.7}
+            clearcoatRoughness={0.3}
+          />
+        </mesh>
+        <mesh position={[0, -0.5, 0]}>
+          <sphereGeometry args={[0.3, 16, 16]} />
+          <meshPhysicalMaterial color="#8b7220" metalness={0.85} roughness={0.25} />
+        </mesh>
+      </group>
+
+      <mesh position={[0, -2, 2.5]} rotation={[Math.PI / 6, 0, 0]}>
+        <cylinderGeometry args={[2.5, 2.5, 0.4, 32]} />
+        <meshPhysicalMaterial
+          color="#d95a4d"
+          metalness={0.88}
+          roughness={0.2}
+          emissive="#8b3a35"
+          emissiveIntensity={emissiveIntensity * 0.2}
+        />
+      </mesh>
+      {[...Array(3)].map((_, i) => (
+        <mesh key={`dish-strut-${i}`} position={[Math.cos((i / 3) * Math.PI * 2) * 1.8, -1.2, 2.2]}>
+          <cylinderGeometry args={[0.08, 0.08, 1.2, 8]} />
+          <meshPhysicalMaterial color="#8b8680" metalness={0.85} roughness={0.3} />
+        </mesh>
+      ))}
+
+      <mesh position={[0, 0, -2.2]}>
+        <boxGeometry args={[4, 2.5, 0.15]} />
+        <meshPhysicalMaterial
+          color="#2a4a6a"
+          metalness={0.7}
+          roughness={0.4}
+          emissive="#0a0a0a"
+          emissiveIntensity={emissiveIntensity * 0.1}
+        />
+      </mesh>
+
+      {[...Array(4)].map((_, i) => (
+        <mesh key={`port-${i}`} position={[2.8, 1.2 - i * 0.8, 1.7]}>
+          <cylinderGeometry args={[0.12, 0.15, 0.3, 8]} />
+          <meshPhysicalMaterial color="#555555" metalness={0.7} roughness={0.35} />
+        </mesh>
+      ))}
+
+      <pointLight position={[6, 3, 4]} color="#ffffff" intensity={12} distance={50} decay={1.5} />
+      <pointLight position={[-6, -2, -4]} color="#ff6b4a" intensity={6} distance={40} decay={1.5} />
+      <pointLight position={[0, -3, 3]} color="#4a9eff" intensity={4} distance={35} decay={1.5} />
+    </group>
+  )
+}
+
 export function ThreeDBackground() {
   return (
     <div className="fixed inset-0 -z-10 h-screen w-screen overflow-hidden">
@@ -351,8 +599,11 @@ export function ThreeDBackground() {
         style={{ width: "100%", height: "100%" }}
       >
         <color attach="background" args={["#263044"]} />
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[100, 100, 50]} intensity={1.5} color="#ffffff" />
         <Starfield />
         <MouseTrail />
+        <Satellite />
       </Canvas>
     </div>
   )

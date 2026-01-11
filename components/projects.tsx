@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 
 const projects = [
   {
@@ -10,6 +11,7 @@ const projects = [
     tags: ["React", "Node.js", "PostgreSQL", "Stripe"],
     link: "#",
     year: "2024",
+    image: "/ecommerce-dashboard.png",
   },
   {
     title: "Task Management App",
@@ -17,6 +19,7 @@ const projects = [
     tags: ["Next.js", "TypeScript", "Supabase", "TailwindCSS"],
     link: "#",
     year: "2023",
+    image: "/task-management-app.png",
   },
   {
     title: "Analytics Dashboard",
@@ -24,6 +27,7 @@ const projects = [
     tags: ["React", "D3.js", "Express", "MongoDB"],
     link: "#",
     year: "2023",
+    image: "/analytics-dashboard-charts.png",
   },
   {
     title: "Design System",
@@ -31,6 +35,7 @@ const projects = [
     tags: ["React", "Storybook", "TypeScript", "CSS-in-JS"],
     link: "#",
     year: "2022",
+    image: "/design-system-components.png",
   },
 ]
 
@@ -60,8 +65,17 @@ export function Projects() {
               />
 
               {/* Card */}
-              <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-6 transition-all duration-300 transform hover:scale-105 hover:border-accent/30">
-                <div className="space-y-4">
+              <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:border-accent/30">
+                <div className="relative h-48 w-full overflow-hidden bg-background/20">
+                  <Image
+                    src={project.image || "/placeholder.svg"}
+                    alt={project.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+
+                <div className="p-6 space-y-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h4 className="text-lg font-bold group-hover:text-accent transition-colors">{project.title}</h4>
