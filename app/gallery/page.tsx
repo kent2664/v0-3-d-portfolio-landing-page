@@ -22,15 +22,15 @@ function CanvasLoadingFallback() {
 
 export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category>("visuals")
-  const [showWarpLoading, setShowWarpLoading] = useState(true)
+  const [showWarpLoading, setShowWarpLoading] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowWarpLoading(false)
-    }, 4200) // Wait for warp animation to complete + flash effect
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setShowWarpLoading(false)
+  //   }, 4200) // Wait for warp animation to complete + flash effect
 
-    return () => clearTimeout(timer)
-  }, [])
+  //   return () => clearTimeout(timer)
+  // }, [])
 
   return (
     <div className="min-h-screen bg-[#1d2533] text-foreground">
