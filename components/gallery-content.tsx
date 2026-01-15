@@ -6,27 +6,43 @@ import { X, Play } from "lucide-react"
 
 type Category = "visuals" | "artifact" | "compose"
 
+interface MediaItem {
+  id: number
+  type: "image" | "video"
+  url: string
+  title: string
+}
+
 interface GalleryContentProps {
   category: Category
 }
 
 export function GalleryContent({ category }: GalleryContentProps) {
-  const [selectedMedia, setSelectedMedia] = useState<string | null>(null)
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null)
 
-  const visualsData = [
-    { id: 1, type: "image", url: "/vast-mountain-valley.png", title: "Sunset Vista" },
-    { id: 2, type: "image", url: "/portrait-photography.png", title: "Urban Portrait" },
-    { id: 3, type: "image", url: "/nature-photography-collection.png", title: "Mountain Peak" },
-    { id: 4, type: "video", url: "/video-thumbnail.png", title: "City Lights" },
-    { id: 5, type: "image", url: "/abstract-composition.png", title: "Abstract Forms" },
-    { id: 6, type: "image", url: "/modern-city-architecture.png", title: "Modern Architecture" },
+  const visualsData: MediaItem[] = [
+    { id: 1, type: "image", url: "/pic1.jpg", title: "Sunset Vista" },
+    { id: 2, type: "image", url: "/pic2.jpg", title: "Spring Contrast" },
+    { id: 3, type: "image", url: "/pic3.jpg", title: "Sacred Gurdian" },
+    { id: 4, type: "video", url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/204V363f4jW7IIUFGCM6ZO/public/video1.mp4", title: "Fuyajo" },
+    { id: 5, type: "image", url: "/pic4.jpg", title: "Hydrangea" },
+    { id: 6, type: "image", url: "/pic5.jpg", title: "Hamburger Sunset" },
+    { id: 7, type: "image", url: "/pic6.jpg", title: "Evening Flight" },
+    { id: 8, type: "image", url: "/pic7.jpg", title: "Modern Architecture" },
+    { id: 9, type: "image", url: "/pic8.jpg", title: "Dreaming Castle" },
+    { id: 10, type: "image", url: "/pic9.jpg", title: "The Busiest City" },
+    { id: 11, type: "image", url: "/pic10.jpg", title: "Ride On!" },
+    { id: 12, type: "image", url: "/pic11.jpg", title: "Unbreakable Will" },
+    { id: 13, type: "image", url: "/pic12.jpg", title: "Tax Return..." },
+    { id: 14, type: "image", url: "/pic13.jpg", title: "The First Avenger" },
+    { id: 15, type: "image", url: "/pic14.jpg", title: "Assemble!" },
   ]
 
-  const artifactData = [
-    { id: 1, url: "/3d-render-abstract.jpg", title: "Geometric Dreams" },
-    { id: 2, url: "/3d-animation-scene.png", title: "Fluid Dynamics" },
-    { id: 3, url: "/3d-sculpture.jpg", title: "Digital Sculpture" },
-    { id: 4, url: "/3d-environment.jpg", title: "Virtual Environment" },
+  const artifactData: MediaItem[] = [
+    { id: 1, type: "video", url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/Lhwg_w7ODBJOtgkMj0hptW/public/blenderAquarium.mp4", title: "Aquarium" },
+    { id: 2, type: "video", url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/iqIcIOdY-DzGMWH6s24Pvg/public/bear0064-0102.mp4", title: "Bear" },
+    { id: 3, type: "image", url: "/3d-sculpture.jpg", title: "Digital Sculpture" },
+    { id: 4, type: "image", url: "/3d-environment.jpg", title: "Virtual Environment" },
   ]
 
   const composeData = [
@@ -55,13 +71,25 @@ export function GalleryContent({ category }: GalleryContentProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
                 className="group relative mb-4 cursor-pointer break-inside-avoid overflow-hidden rounded-lg"
-                onClick={() => setSelectedMedia(item.url)}
+                onClick={() => setSelectedMedia(item)}
               >
-                <img
-                  src={item.url || "/placeholder.svg"}
-                  alt={item.title}
-                  className="w-full transition-transform group-hover:scale-105"
-                />
+                {item.type === "video" ? (
+                  <video
+                    src={item.url}
+                    muted
+                    playsInline
+                    loop
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => e.currentTarget.pause()}
+                    className="w-full rounded-lg object-cover transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <img
+                    src={item.url || "/placeholder.svg"}
+                    alt={item.title}
+                    className="w-full transition-transform group-hover:scale-105"
+                  />
+                )}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                   {item.type === "video" && <Play className="h-12 w-12 text-white" />}
                   <p className="absolute bottom-4 left-4 text-sm font-medium text-white">{item.title}</p>
@@ -83,13 +111,25 @@ export function GalleryContent({ category }: GalleryContentProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className="group relative min-w-[400px] cursor-pointer overflow-hidden rounded-lg"
-                onClick={() => setSelectedMedia(item.url)}
+                onClick={() => setSelectedMedia(item)}
               >
-                <img
-                  src={item.url || "/placeholder.svg"}
-                  alt={item.title}
-                  className="h-[300px] w-full object-cover transition-transform group-hover:scale-105"
-                />
+                {item.type === "video" ? (
+                  <video
+                    src={item.url}
+                    muted
+                    playsInline
+                    loop
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => e.currentTarget.pause()}
+                    className="h-[300px] w-full object-cover transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <img
+                    src={item.url || "/placeholder.svg"}
+                    alt={item.title}
+                    className="h-[300px] w-full object-cover transition-transform group-hover:scale-105"
+                  />
+                )}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                   <Play className="h-12 w-12 text-white" />
                 </div>
@@ -143,11 +183,22 @@ export function GalleryContent({ category }: GalleryContentProps) {
           >
             <X className="h-6 w-6 text-white" />
           </button>
-          <img
-            src={selectedMedia || "/placeholder.svg"}
-            alt="Full size"
-            className="max-h-[90vh] max-w-[90vw] rounded-lg"
-          />
+          {selectedMedia.type === "video" ? (
+            <video
+              src={selectedMedia.url}
+              controls
+              autoPlay
+              loop
+              className="max-h-[90vh] max-w-[90vw] rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={selectedMedia.url || "/placeholder.svg"}
+              alt={selectedMedia.title}
+              className="max-h-[90vh] max-w-[90vw] rounded-lg"
+            />
+          )}
         </motion.div>
       )}
     </motion.div>

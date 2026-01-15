@@ -7,7 +7,8 @@ import { Skills } from "@/components/skills"
 import { Contact } from "@/components/contact"
 import { Navigation } from "@/components/navigation"
 import { ThreeDBackground } from "@/components/3d-background"
-import { Loader } from "@/components/loader"
+// import { Loader } from "@/components/loader"
+import { WarpLoading } from "@/components/warp-loading"
 import { GalleryIntro } from "@/components/gallery-intro"
 
 export default function Home() {
@@ -16,17 +17,18 @@ export default function Home() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 1500)
+    }, 4000)
 
     return () => clearTimeout(timer)
   }, [])
 
-  if (isLoading) {
-    return <Loader />
-  }
+  // if (isLoading) {
+  //   return <Loader />
+  // }
 
   return (
     <div className="min-h-screen text-foreground">
+    　<WarpLoading isLoading={isLoading} />
       <ThreeDBackground />
       <div className="absolute inset-0 -z-8 bg-black/30" />
       <Navigation />
