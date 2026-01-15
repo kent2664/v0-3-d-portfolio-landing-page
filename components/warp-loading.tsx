@@ -7,7 +7,6 @@ interface Particle {
   x: number
   y: number
   z: number
-  vz: number
   size: number
   color: string
 }
@@ -15,23 +14,37 @@ interface Particle {
 export function WarpLoading({ isLoading = true }: { isLoading?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [progress, setProgress] = useState(0)
+  const [shouldRender, setShouldRender] = useState(false) // 初回判定用
   const progressRef = useRef(0)
   const particlesRef = useRef<Particle[]>([])
   const animationIdRef = useRef<number>()
 
-  // 1. progressの状態をRefに同期（アニメーションループで最新値を使うため）
+  // 1. セッションストレージを確認して、ギャラリー遷移時などは表示しないようにする
+  useEffect(() => {
+    const hasLoaded = sessionStorage.getItem("hasVisited")
+    if (!hasLoaded && isLoading) {
+      setShouldRender(true)
+    } else {
+      setShouldRender(false)
+    }
+  }, [isLoading])
+
   useEffect(() => {
     progressRef.current = progress
+    if (progress >= 100) {
+      sessionStorage.setItem("hasVisited", "true")
+    }
   }, [progress])
 
-  // 2. アニメーションのメインロジック
+  // 2. アニメーションロジック
   useEffect(() => {
+    if (!shouldRender) return
+
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // キャンバスサイズをウィンドウに固定
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
@@ -39,51 +52,67 @@ export function WarpLoading({ isLoading = true }: { isLoading?: boolean }) {
     resizeCanvas()
     window.addEventListener("resize", resizeCanvas)
 
-    // パーティクルの初期化
-    const particleCount = 600
+    const particleCount = 700
     particlesRef.current = Array.from({ length: particleCount }, () => ({
       x: (Math.random() - 0.5) * 2000,
       y: (Math.random() - 0.5) * 2000,
       z: Math.random() * 1000,
-      vz: 2,
-      size: Math.random() * 2 + 1,
-      color: Math.random() > 0.5 ? "#d5370b" : "#ffffff", // オレンジか白
+      size: Math.random() * 1.5 + 0.5,
+      // 星の色：基本は白と青白い星、少しだけアクセントにオレンジ
+      color: Math.random() > 0.1 ? (Math.random() > 0.5 ? "#ffffff" : "#e0f2ff") : "#d5370b",
     }))
 
     const animate = () => {
-      // 背景を薄く塗りつぶして「残像」を作る
-      ctx.fillStyle = "rgba(10, 0, 21, 0.4)"
+      // 背景：オレンジ味を消し、深い宇宙の紺黒（Deep Space Blue）に
+      ctx.fillStyle = "rgba(2, 4, 12, 0.5)" 
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 加速感の計算
       const p = progressRef.current
-      const acceleration = Math.pow(p / 100, 2) * 40 
-      const speed = 2 + acceleration
+      // 加速のカーブを調整（後半一気に速く）
+      const acceleration = Math.pow(p / 100, 3) * 60
+      const speed = 3 + acceleration
+
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
 
       particlesRef.current.forEach((pt) => {
         pt.z -= speed
 
-        // 画面より手前に来たら奥にリセット
         if (pt.z <= 1) {
           pt.z = 1000
         }
 
-        // 3Dから2Dへの座標変換（遠近法）
         const scale = 400 / pt.z
-        const x = canvas.width / 2 + pt.x * scale
-        const y = canvas.height / 2 + pt.y * scale
+        const x = centerX + pt.x * scale
+        const y = centerY + pt.y * scale
 
-        // 画面内の場合のみ描画
         if (x > 0 && x < canvas.width && y > 0 && y < canvas.height) {
-          const size = pt.size * scale * 0.1
-          const length = size * (1 + acceleration * 0.5) // 加速時に線を伸ばす
+          const size = pt.size * scale * 0.15
+          
+          // ★修正ポイント：放射状に線を引く（中心から外側へ）
+          // 現在位置(x,y)から中心点(centerX, centerY)の逆方向に線を伸ばす
+          const dx = x - centerX
+          const dy = y - centerY
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          
+          // 加速に応じて線の長さを伸ばす（ワープ感の強調）
+          const stretch = 1 + (acceleration * 0.1)
+          const lineX = x + (dx / dist) * stretch * (scale * 0.5)
+          const lineY = y + (dy / dist) * stretch * (scale * 0.5)
 
           ctx.beginPath()
           ctx.strokeStyle = pt.color
           ctx.lineWidth = size
+          ctx.lineCap = "round"
           ctx.moveTo(x, y)
-          ctx.lineTo(x, y + length) // 移動方向に線を引く
+          ctx.lineTo(lineX, lineY)
           ctx.stroke()
+          
+          // 星の先端に光の粒を追加して視認性アップ
+          ctx.fillStyle = pt.color
+          ctx.beginPath()
+          ctx.arc(lineX, lineY, size * 0.8, 0, Math.PI * 2)
+          ctx.fill()
         }
       })
 
@@ -96,38 +125,39 @@ export function WarpLoading({ isLoading = true }: { isLoading?: boolean }) {
       window.removeEventListener("resize", resizeCanvas)
       if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current)
     }
-  }, []) // ここは空配列で1度だけ実行
+  }, [shouldRender])
 
-  // 3. プログレスバーの進捗シミュレーション
+  // 3. 進捗シミュレーション
   useEffect(() => {
-    if (!isLoading) return
+    if (!shouldRender) return
     const interval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 100 : prev + Math.random() * 8))
-    }, 150)
+      setProgress((prev) => (prev >= 100 ? 100 : prev + Math.random() * 5))
+    }, 100)
     return () => clearInterval(interval)
-  }, [isLoading])
+  }, [shouldRender])
 
   return (
     <AnimatePresence>
-      {isLoading && (
+      {shouldRender && progress < 100 && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0a0015]"
+          exit={{ opacity: 0, scale: 1.5, filter: "blur(20px)" }}
+          transition={{ duration: 1.2, ease: "easeIn" }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#02040c]"
         >
-          {/* Canvas自体が消えないように絶対配置 */}
           <canvas ref={canvasRef} className="absolute inset-0 block" />
           
+          {/* 中央の％表示を少し控えめに、かつ宇宙らしく */}
           <div className="relative z-10 text-center pointer-events-none">
             <motion.div
-              animate={{ scale: [1, 1.05, 1] }}
+              animate={{ opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="text-7xl font-black text-[#d5370b] drop-shadow-[0_0_20px_rgba(213,55,11,0.5)]"
+              className="text-6xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
             >
               {Math.floor(progress)}%
             </motion.div>
-            <p className="mt-4 text-xs tracking-[0.5em] text-white/50 uppercase font-light">
-              Hyperspace Jump
+            <p className="mt-4 text-[10px] tracking-[0.8em] text-[#d5370b] uppercase font-bold">
+              Hyper-speed connection
             </p>
           </div>
         </motion.div>
