@@ -1,8 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState } from "react"
-import { X, Play } from "lucide-react"
+import { useState, useRef } from "react"
+import { X, Play, Pause } from "lucide-react"
 
 type Category = "visuals" | "artifact" | "compose"
 
@@ -13,18 +13,32 @@ interface MediaItem {
   title: string
 }
 
+interface ComposeItem {
+  id: number
+  title: string
+  duration: string
+  url: string
+}
+
 interface GalleryContentProps {
   category: Category
 }
 
 export function GalleryContent({ category }: GalleryContentProps) {
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null)
+  const [playingAudio, setPlayingAudio] = useState<number | null>(null)
+  const audioRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({})
 
   const visualsData: MediaItem[] = [
     { id: 1, type: "image", url: "/pic1.jpg", title: "Sunset Vista" },
     { id: 2, type: "image", url: "/pic2.jpg", title: "Spring Contrast" },
     { id: 3, type: "image", url: "/pic3.jpg", title: "Sacred Gurdian" },
-    { id: 4, type: "video", url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/204V363f4jW7IIUFGCM6ZO/public/video1.mp4", title: "Fuyajo" },
+    {
+      id: 4,
+      type: "video",
+      url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/204V363f4jW7IIUFGCM6ZO/public/video1.mp4",
+      title: "Fuyajo",
+    },
     { id: 5, type: "image", url: "/pic4.jpg", title: "Hydrangea" },
     { id: 6, type: "image", url: "/pic5.jpg", title: "Hamburger Sunset" },
     { id: 7, type: "image", url: "/pic6.jpg", title: "Evening Flight" },
@@ -39,18 +53,37 @@ export function GalleryContent({ category }: GalleryContentProps) {
   ]
 
   const artifactData: MediaItem[] = [
-    { id: 1, type: "video", url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/Lhwg_w7ODBJOtgkMj0hptW/public/blenderAquarium.mp4", title: "Aquarium" },
-    { id: 2, type: "video", url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/iqIcIOdY-DzGMWH6s24Pvg/public/bear0064-0102.mp4", title: "Bear" },
-    { id: 3, type: "image", url: "/3d-sculpture.jpg", title: "Digital Sculpture" },
-    { id: 4, type: "image", url: "/3d-environment.jpg", title: "Virtual Environment" },
+    {
+      id: 1,
+      type: "video",
+      url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/Lhwg_w7ODBJOtgkMj0hptW/public/blenderAquarium.mp4",
+      title: "Aquarium",
+    },
+    {
+      id: 2,
+      type: "video",
+      url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_p8aL5UrSNi1BGP7UT2MBBFxyLYQd/iqIcIOdY-DzGMWH6s24Pvg/public/bear0064-0102.mp4",
+      title: "Bear",
+    },
+
   ]
 
-  const composeData = [
-    { id: 1, title: "Midnight Melody", duration: "3:45", waveform: "/waveform-abstract.png" },
-    { id: 2, title: "Urban Symphony", duration: "4:20", waveform: "/waveform-abstract.png" },
-    { id: 3, title: "Digital Dreamscape", duration: "5:10", waveform: "/waveform-abstract.png" },
-    { id: 4, title: "Ambient Waves", duration: "6:30", waveform: "/waveform-abstract.png" },
-  ]
+  const composeData: ComposeItem[] = []
+
+  const togglePlay = (id: number) => {
+    const video = audioRefs.current[id]
+    if (!video) return
+
+    if (playingAudio === id) {
+      video.pause()
+      setPlayingAudio(null)
+    } else {
+      // Pause any currently playing
+      Object.values(audioRefs.current).forEach((v) => v?.pause())
+      video.play()
+      setPlayingAudio(id)
+    }
+  }
 
   return (
     <motion.div
@@ -158,10 +191,30 @@ export function GalleryContent({ category }: GalleryContentProps) {
                   <h3 className="font-semibold">{item.title}</h3>
                   <span className="text-sm text-muted-foreground">{item.duration}</span>
                 </div>
-                <img src={item.waveform || "/placeholder.svg"} alt="Waveform" className="mb-4 w-full rounded" />
-                <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground transition-colors hover:bg-accent/90">
-                  <Play className="h-4 w-4" />
-                  Play
+                {/* Video element for the composition */}
+                <video
+                  ref={(el) => {
+                    audioRefs.current[item.id] = el
+                  }}
+                  src={item.url}
+                  className="mb-4 w-full rounded"
+                  onEnded={() => setPlayingAudio(null)}
+                />
+                <button
+                  onClick={() => togglePlay(item.id)}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+                >
+                  {playingAudio === item.id ? (
+                    <>
+                      <Pause className="h-4 w-4" />
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4" />
+                      Play
+                    </>
+                  )}
                 </button>
               </motion.div>
             ))}
