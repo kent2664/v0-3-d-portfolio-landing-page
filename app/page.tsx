@@ -10,7 +10,8 @@ import { ThreeDBackground } from "@/components/3d-background"
 // import { Loader } from "@/components/loader"
 import { WarpLoading } from "@/components/warp-loading"
 import { GalleryIntro } from "@/components/gallery-intro"
-import { motion } from "framer-motion" 
+import { CareerTimeline } from "@/components/career-timeline"
+import { motion } from "framer-motion"
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
@@ -28,25 +29,25 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [])
 
-
   return (
     <div className="min-h-screen text-foreground">
-    <WarpLoading isLoading={isLoading} />
-    <motion.div
+      <WarpLoading isLoading={isLoading} />
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoading ? 0 : 1 }}
         transition={{ duration: 1, ease: "easeInOut" }}
       >
-      <ThreeDBackground />
-      <div className="absolute inset-0 -z-8 bg-black/30" />
-      <Navigation />
-      <main className="mx-auto max-w-4xl">
-        <Hero />
-        <Projects />
-        <Skills />
-        <GalleryIntro />
-        <Contact />
-      </main>
+        <ThreeDBackground />
+        <div className="absolute inset-0 -z-8 bg-black/30" />
+        <Navigation />
+        <main className="mx-auto max-w-4xl">
+          <Hero />
+          <CareerTimeline />
+          <Projects />
+          <Skills />
+          <GalleryIntro />
+          <Contact />
+        </main>
       </motion.div>
     </div>
   )

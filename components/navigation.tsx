@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { ExternalLink } from "lucide-react"
 
 export function Navigation() {
   const [activeSection, setActiveSection] = useState("about")
@@ -11,10 +12,47 @@ export function Navigation() {
 
   const sections = [
     { id: "about", label: "ABOUT" },
+    { id: "career", label: "CAREER" },
     { id: "projects", label: "PROJECTS" },
     { id: "skills", label: "SKILLS" },
     { id: "contact", label: "CONTACT" },
   ]
+
+  useEffect(() => {
+    if (pathname !== "/") return
+
+    const observerOptions = {
+      root: null,
+      rootMargin: "-20% 0px -70% 0px", // Trigger when section is 20% from top
+      threshold: 0,
+    }
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id)
+        }
+      })
+    }
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions)
+
+    sections.forEach((section) => {
+      const element = document.getElementById(section.id)
+      if (element) {
+        observer.observe(element)
+      }
+    })
+
+    return () => {
+      sections.forEach((section) => {
+        const element = document.getElementById(section.id)
+        if (element) {
+          observer.unobserve(element)
+        }
+      })
+    }
+  }, [pathname])
 
   const scrollToSection = (id: string) => {
     setActiveSection(id)
@@ -49,9 +87,10 @@ export function Navigation() {
                 ))}
                 <Link
                   href="/gallery"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
                 >
                   GALLERY
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </Link>
               </>
             ) : (
@@ -102,9 +141,10 @@ export function Navigation() {
             ))}
             <Link
               href="/gallery"
-              className="block text-sm font-medium py-2 px-0 text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 text-sm font-medium py-2 px-0 text-muted-foreground hover:text-foreground transition-colors"
             >
               GALLERY
+              <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>
         )}
