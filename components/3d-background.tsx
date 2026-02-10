@@ -355,6 +355,7 @@ const Satellite = () => {
   const [visualHealth, setVisualHealth] = useState(100)
   const isHoveringRef = useRef(false)
   const [damageRedTint, setDamageRedTint] = useState(0)
+  const safeDamageRedTint = isNaN(damageRedTint) ? 0 : Math.max(0, Math.min(1, damageRedTint))
   const debrisRef = useRef<Array<{ position: THREE.Vector3; velocity: THREE.Vector3; life: number }>>([])
 
   const handlePointerOver = () => {
@@ -455,11 +456,11 @@ const Satellite = () => {
       <mesh>
         <boxGeometry args={[6, 3.5, 3.5]} />
         <meshPhysicalMaterial
-          color={`#${Math.round(139 + damageRedTint * 116)
+          color={`#${Math.max(0, Math.min(255, Math.round(139 + safeDamageRedTint * 116)))
             .toString(16)
-            .padStart(2, "0")}${Math.round(134 + damageRedTint * 122)
+            .padStart(2, "0")}${Math.max(0, Math.min(255, Math.round(134 + safeDamageRedTint * 122)))
             .toString(16)
-            .padStart(2, "0")}${Math.round(128 + damageRedTint * 127)
+            .padStart(2, "0")}${Math.max(0, Math.min(255, Math.round(128 + safeDamageRedTint * 127)))
             .toString(16)
             .padStart(2, "0")}`}
           metalness={0.95}
