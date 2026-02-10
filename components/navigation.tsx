@@ -63,7 +63,7 @@ export function Navigation() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-muted bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto max-w-4xl px-6 py-6">
+      <div className="mx-auto max-w-5xl px-6 py-6">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-xl font-bold tracking-tight hover:text-accent transition-colors">
             Kenta Yusa

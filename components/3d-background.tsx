@@ -346,7 +346,7 @@ const Starfield = () => {
   )
 }
 
-const Satellite = () => {
+const Satellite = ({ cinematic = false }: { cinematic?: boolean }) => {
   const groupRef = useRef<THREE.Group>(null)
   const hitboxRef = useRef<THREE.Mesh>(null)
   const [orbitAngle, setOrbitAngle] = useState(0)
@@ -355,7 +355,9 @@ const Satellite = () => {
   const [visualHealth, setVisualHealth] = useState(100)
   const isHoveringRef = useRef(false)
   const [damageRedTint, setDamageRedTint] = useState(0)
+  const safeDamageRedTint = isNaN(damageRedTint) ? 0 : Math.max(0, Math.min(1, damageRedTint))
   const debrisRef = useRef<Array<{ position: THREE.Vector3; velocity: THREE.Vector3; life: number }>>([])
+  const cinematicProgressRef = useRef(0)
 
   const handlePointerOver = () => {
     isHoveringRef.current = true
@@ -367,6 +369,36 @@ const Satellite = () => {
 
   useFrame((state) => {
     if (!groupRef.current) return
+
+    // Cinematic approach animation
+    if (cinematic) {
+      cinematicProgressRef.current = Math.min(cinematicProgressRef.current + state.clock.getDelta() * 0.7, 1)
+      const t = cinematicProgressRef.current
+      // Smooth ease-in-out cubic
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+      // Lerp from current orbit position toward camera center
+      const targetX = 0
+      const targetY = 0
+      const targetZ = 40
+      const targetScale = 3.5
+
+      const currentOrbitX = Math.cos(orbitAngle) * 300
+      const currentOrbitY = Math.sin(orbitAngle * 0.5) * 80
+
+      groupRef.current.position.x = currentOrbitX + (targetX - currentOrbitX) * eased
+      groupRef.current.position.y = currentOrbitY + (targetY - currentOrbitY) * eased
+      groupRef.current.position.z = -150 + (targetZ - (-150)) * eased
+
+      const s = 0.8 + (targetScale - 0.8) * eased
+      groupRef.current.scale.set(s, s, s)
+
+      groupRef.current.rotation.y += 0.008
+      groupRef.current.rotation.x += 0.002
+      return
+    } else {
+      cinematicProgressRef.current = 0
+    }
 
     if (isHoveringRef.current && !isDestroyed && healthRef.current > 0) {
       healthRef.current = Math.max(healthRef.current - 10 * state.clock.deltaTime, 0)
@@ -455,11 +487,11 @@ const Satellite = () => {
       <mesh>
         <boxGeometry args={[6, 3.5, 3.5]} />
         <meshPhysicalMaterial
-          color={`#${Math.round(139 + damageRedTint * 116)
+          color={`#${Math.max(0, Math.min(255, Math.round(139 + safeDamageRedTint * 116)))
             .toString(16)
-            .padStart(2, "0")}${Math.round(134 + damageRedTint * 122)
+            .padStart(2, "0")}${Math.max(0, Math.min(255, Math.round(134 + safeDamageRedTint * 122)))
             .toString(16)
-            .padStart(2, "0")}${Math.round(128 + damageRedTint * 127)
+            .padStart(2, "0")}${Math.max(0, Math.min(255, Math.round(128 + safeDamageRedTint * 127)))
             .toString(16)
             .padStart(2, "0")}`}
           metalness={0.95}
@@ -590,7 +622,7 @@ const Satellite = () => {
   )
 }
 
-export function ThreeDBackground() {
+export function ThreeDBackground({ cinematic = false }: { cinematic?: boolean }) {
   return (
     <div className="fixed inset-0 -z-10 h-screen w-screen overflow-hidden">
       <Canvas
@@ -603,7 +635,7 @@ export function ThreeDBackground() {
         <directionalLight position={[100, 100, 50]} intensity={1.5} color="#ffffff" />
         <Starfield />
         <MouseTrail />
-        <Satellite />
+        <Satellite cinematic={cinematic} />
       </Canvas>
     </div>
   )
