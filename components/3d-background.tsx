@@ -365,7 +365,7 @@ const Satellite = () => {
     isHoveringRef.current = false
   }
 
-  const [hoverScale, setHoverScale] = useState(1)
+  const hoverScaleRef = useRef(0.8)
 
   useFrame((state) => {
     if (!groupRef.current) return
@@ -415,8 +415,8 @@ const Satellite = () => {
 
     // Apply hover scale effect
     const targetScale = isHoveringRef.current ? 0.9 : 0.8
-    setHoverScale((prev) => prev + (targetScale - prev) * 0.1)
-    groupRef.current.scale.set(hoverScale, hoverScale, hoverScale)
+    hoverScaleRef.current += (targetScale - hoverScaleRef.current) * 0.1
+    groupRef.current.scale.set(hoverScaleRef.current, hoverScaleRef.current, hoverScaleRef.current)
 
     if (!isDestroyed) {
       const newAngle = orbitAngle + 0.0005
@@ -460,13 +460,17 @@ const Satellite = () => {
       <mesh>
         <boxGeometry args={[6, 3.5, 3.5]} />
         <meshPhysicalMaterial
-          color={`#${Math.round(Math.min(139 + damageRedTint * 116, 255))
-            .toString(16)
-            .padStart(2, "0")}${Math.round(Math.min(134 + damageRedTint * 122, 255))
-            .toString(16)
-            .padStart(2, "0")}${Math.round(Math.min(128 + damageRedTint * 127, 255))
-            .toString(16)
-            .padStart(2, "0")}`}
+          color={
+            damageRedTint !== null && damageRedTint !== undefined && !isNaN(damageRedTint)
+              ? `#${Math.round(Math.max(0, Math.min(139 + damageRedTint * 116, 255)))
+                  .toString(16)
+                  .padStart(2, "0")}${Math.round(Math.max(0, Math.min(134 + damageRedTint * 122, 255)))
+                  .toString(16)
+                  .padStart(2, "0")}${Math.round(Math.max(0, Math.min(128 + damageRedTint * 127, 255)))
+                  .toString(16)
+                  .padStart(2, "0")}`
+              : "#8b8680"
+          }
           metalness={0.95}
           roughness={0.25}
           clearcoat={0.8}
