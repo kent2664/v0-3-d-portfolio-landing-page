@@ -365,6 +365,8 @@ const Satellite = () => {
     isHoveringRef.current = false
   }
 
+  const [hoverScale, setHoverScale] = useState(1)
+
   useFrame((state) => {
     if (!groupRef.current) return
 
@@ -411,7 +413,10 @@ const Satellite = () => {
       return debris.life > 0
     })
 
-    groupRef.current.scale.set(0.8, 0.8, 0.8)
+    // Apply hover scale effect
+    const targetScale = isHoveringRef.current ? 0.9 : 0.8
+    setHoverScale((prev) => prev + (targetScale - prev) * 0.1)
+    groupRef.current.scale.set(hoverScale, hoverScale, hoverScale)
 
     if (!isDestroyed) {
       const newAngle = orbitAngle + 0.0005

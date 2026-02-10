@@ -108,7 +108,7 @@ export function CareerTimeline() {
           A timeline of growth and leadership in software development
         </motion.p>
 
-        <div ref={containerRef} className="relative h-screen max-h-[800px] flex items-center justify-center">
+        <div ref={containerRef} className="relative w-full h-auto md:min-h-[900px] flex flex-col md:flex-row items-stretch md:items-center justify-center gap-8 md:gap-0">
           <motion.div
             animate={{
               boxShadow: `0 0 60px rgba(213, 55, 11, 0.6)`,
