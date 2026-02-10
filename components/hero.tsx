@@ -1,6 +1,18 @@
 "use client"
 
+import { motion } from "framer-motion"
+import { useRef, useEffect, useState } from "react"
+
 export function Hero() {
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [canScroll, setCanScroll] = useState(false)
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (container) {
+      setCanScroll(container.scrollWidth > container.clientWidth)
+    }
+  }, [])
   return (
     <section id="about" className="relative flex min-h-screen items-center justify-center px-6 py-20">
       <div className="max-w-2xl text-center relative z-10">
@@ -36,12 +48,32 @@ export function Hero() {
             </p>
           </div>
 
-          {/* Experience Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+          {/* Experience Cards - Horizontal Scroll */}
+          <div
+            ref={scrollContainerRef}
+            className="flex flex-row gap-4 mt-8 overflow-x-auto pb-4"
+            style={{
+              scrollBehavior: "smooth",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <style>{`
+              div::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+
             {/* Development Lead Experience Card */}
-            <div className="relative group">
+            <motion.div
+              className="relative group flex-shrink-0 w-80"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
+              <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <span className="text-lg">👨‍💼</span>
@@ -55,12 +87,18 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Internal Business Tools Card */}
-            <div className="relative group">
+            <motion.div
+              className="relative group flex-shrink-0 w-80"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true, margin: "-100px" }}
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
+              <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <span className="text-lg">⚙️</span>
@@ -73,12 +111,18 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Passionate tech stack Card */}
-            <div className="relative group">
+            <motion.div
+              className="relative group flex-shrink-0 w-80"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true, margin: "-100px" }}
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
+              <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <span className="text-lg">🔥</span>
@@ -91,7 +135,7 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
