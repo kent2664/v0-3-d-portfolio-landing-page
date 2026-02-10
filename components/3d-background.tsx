@@ -460,11 +460,11 @@ const Satellite = () => {
       <mesh>
         <boxGeometry args={[6, 3.5, 3.5]} />
         <meshPhysicalMaterial
-          color={`#${Math.round(139 + damageRedTint * 116)
+          color={`#${Math.round(Math.min(139 + damageRedTint * 116, 255))
             .toString(16)
-            .padStart(2, "0")}${Math.round(134 + damageRedTint * 122)
+            .padStart(2, "0")}${Math.round(Math.min(134 + damageRedTint * 122, 255))
             .toString(16)
-            .padStart(2, "0")}${Math.round(128 + damageRedTint * 127)
+            .padStart(2, "0")}${Math.round(Math.min(128 + damageRedTint * 127, 255))
             .toString(16)
             .padStart(2, "0")}`}
           metalness={0.95}
