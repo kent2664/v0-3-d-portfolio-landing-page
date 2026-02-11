@@ -14,8 +14,9 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
   const positions = useRef(
     new Float32Array(
       Array.from({ length: maxParticles * 3 }, (_, i) => {
-        // Initialize Y position from top (1.5 to 2.0) instead of spread across entire space
-        if (i % 3 === 1) return 1.8 + Math.random() * 0.4
+        // Initialize Y position much higher (above visible canvas) so particles flow down from top
+        // Camera is at Z=5, viewport is roughly -2 to 2 in Y, so spawn at 3.5-4.0 for high start
+        if (i % 3 === 1) return 3.5 + Math.random() * 0.8
         // Constrain X and Z to button viewport (-1.2 to 1.2)
         return (Math.random() - 0.5) * 2.4
       })
@@ -44,9 +45,9 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
       
       // Show/hide particles based on scroll progress
       if (i > particleCount) {
-        // Inactive particles stay at top
+        // Inactive particles stay at high spawn point
         posArray[i3] = (Math.random() - 0.5) * 2.4
-        posArray[i3 + 1] = 1.8
+        posArray[i3 + 1] = 3.5 + Math.random() * 0.8
         posArray[i3 + 2] = (Math.random() - 0.5) * 2.4
         settled.current[i] = false
         continue
@@ -56,9 +57,9 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
         // Particles fall down
         posArray[i3 + 1] -= velocities.current[i3 + 1]
         
-        // Constrain X and Z to stay within button bounds
-        if (Math.abs(posArray[i3]) > 1.2) posArray[i3] *= 0.95
-        if (Math.abs(posArray[i3 + 2]) > 1.2) posArray[i3 + 2] *= 0.95
+        // Constrain X and Z tightly to stay within button bounds (with padding)
+        if (Math.abs(posArray[i3]) > 1.0) posArray[i3] *= 0.9
+        if (Math.abs(posArray[i3 + 2]) > 1.0) posArray[i3 + 2] *= 0.9
         
         // Accumulate at bottom when scroll is near end
         if (scrollProgress > 0.85 && posArray[i3 + 1] < -0.5) {
@@ -66,9 +67,9 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
           settled.current[i] = true
         }
         
-        // Reset particle if it falls too far
-        if (posArray[i3 + 1] < -1.5) {
-          posArray[i3 + 1] = 1.8 + Math.random() * 0.4
+        // Reset particle if it falls too far (below visible canvas area)
+        if (posArray[i3 + 1] < -2.0) {
+          posArray[i3 + 1] = 3.5 + Math.random() * 0.8
           posArray[i3] = (Math.random() - 0.5) * 2.4
           posArray[i3 + 2] = (Math.random() - 0.5) * 2.4
           settled.current[i] = false
@@ -80,23 +81,27 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
   })
 
   return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={maxParticles}
-          array={positions.current}
-          itemSize={3}
+    <group>
+      {/* Clipping planes to contain particles within button bounds */}
+      <points ref={particlesRef} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={maxParticles}
+            array={positions.current}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.08}
+          color="#d5370b"
+          transparent
+          opacity={0.9}
+          sizeAttenuation
+          clipping={true}
         />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.08}
-        color="#d5370b"
-        transparent
-        opacity={0.9}
-        sizeAttenuation
-      />
-    </points>
+      </points>
+    </group>
   )
 }
 
@@ -145,7 +150,7 @@ export function BackToTop() {
         }}
       >
         {/* 3D Canvas Background */}
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-full">
           <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
             <Particles scrollProgress={scrollProgress} />
           </Canvas>
