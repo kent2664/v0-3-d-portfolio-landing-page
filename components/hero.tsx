@@ -16,6 +16,17 @@ export function Hero() {
     container.scrollLeft += e.deltaY
   }, [])
 
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const href = e.currentTarget.getAttribute('href')
+    if (href?.startsWith('#')) {
+      e.preventDefault()
+      const element = document.querySelector(href)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }
+
   return (
     <section id="about" className="relative flex min-h-screen items-center justify-center px-6 py-20">
       <div className="w-full text-center relative z-10">
@@ -50,18 +61,24 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <a
+          <motion.a
             href="#projects"
-            className="rounded-lg bg-accent px-8 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+            onClick={handleSmoothScroll}
+            className="rounded-lg bg-accent px-8 py-3 font-medium text-accent-foreground transition-all hover:bg-accent/90 shadow-sm"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(213, 55, 11, 0.4)" }}
+            whileTap={{ scale: 0.98 }}
           >
             View My Work
-          </a>
-          <a
+          </motion.a>
+          <motion.a
             href="#contact"
-            className="rounded-lg border-2 border-accent/40 bg-accent/5 px-8 py-3 font-medium text-foreground transition-all hover:bg-accent/10 hover:border-accent/60"
+            onClick={handleSmoothScroll}
+            className="rounded-lg border-2 border-accent/40 bg-accent/5 px-8 py-3 font-medium text-foreground transition-all hover:bg-accent/10 hover:border-accent/60 shadow-sm"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(213, 55, 11, 0.3)" }}
+            whileTap={{ scale: 0.98 }}
           >
             Get In Touch
-          </a>
+          </motion.a>
         </motion.div>
 
         <div className="mt-20 space-y-6 pt-12">

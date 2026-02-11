@@ -12,9 +12,12 @@ export function GalleryIntro({ onCinematicTrigger }: { onCinematicTrigger?: () =
     if (onCinematicTrigger) {
       onCinematicTrigger()
     }
-    // Navigate after the cinematic animation has time to play
+    // Navigate after the cinematic animation has time to play with smooth scroll
     setTimeout(() => {
-      router.push("/gallery")
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setTimeout(() => {
+        router.push("/gallery")
+      }, 500)
     }, 1800)
   }
 

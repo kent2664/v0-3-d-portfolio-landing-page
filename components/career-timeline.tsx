@@ -5,6 +5,7 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { Building2, Users, Briefcase } from "lucide-react"
+import { useMediaQuery } from "@/hooks/use-mobile"
 
 interface Planet {
   id: number
@@ -72,10 +73,11 @@ const careerData: Planet[] = [
 export function CareerTimeline() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const isMobile = useMediaQuery("(max-width: 768px)")
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return
+      if (!containerRef.current || isMobile) return
       const rect = containerRef.current.getBoundingClientRect()
       setMousePosition({
         x: e.clientX - rect.left,
@@ -84,9 +86,11 @@ export function CareerTimeline() {
     }
 
     const container = containerRef.current
-    container?.addEventListener("mousemove", handleMouseMove)
+    if (!isMobile) {
+      container?.addEventListener("mousemove", handleMouseMove)
+    }
     return () => container?.removeEventListener("mousemove", handleMouseMove)
-  }, [])
+  }, [isMobile])
 
   return (
     <section id="career" className="py-20 px-4 relative overflow-hidden border-t border-[#664903]">
@@ -108,43 +112,121 @@ export function CareerTimeline() {
           A timeline of growth and leadership in software development
         </motion.p>
 
-        <div ref={containerRef} className="relative h-screen max-h-[800px] flex items-center justify-center">
-          <motion.div
-            animate={{
-              boxShadow: `0 0 60px rgba(213, 55, 11, 0.6)`,
-            }}
-            transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
-            className="absolute w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg z-30"
-            style={{
-              left: "50%",
-              top: "50%",
-              translateX: "-50%",
-              translateY: "calc(-50% - 230px)", // Position at top of timeline
-            }}
-          >
-            ME
-          </motion.div>
+        <div ref={containerRef} className={isMobile ? "space-y-8 px-2" : "relative h-screen max-h-[800px] flex items-center justify-center"}>
+          {!isMobile && (
+            <motion.div
+              animate={{
+                boxShadow: `0 0 60px rgba(213, 55, 11, 0.6)`,
+              }}
+              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
+              className="absolute w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg z-30"
+              style={{
+                left: "50%",
+                top: "50%",
+                translateX: "-50%",
+                translateY: "calc(-50% - 230px)", // Position at top of timeline
+              }}
+            >
+              ME
+            </motion.div>
+          )}
 
-          {/* Planets arranged vertically */}
-          {careerData.map((planet, index) => {
-            return (
+          {/* Mobile Vertical Layout */}
+          {isMobile ? (
+            <div className="flex flex-col items-center gap-8">
               <motion.div
-                key={planet.id}
-                initial={{ opacity: 0, scale: 0 }}
-                whileInView={{ opacity: 1, scale: 1, x: planet.x, y: planet.y }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{
-                  duration: 0.6,
-                  delay: index * 0.1,
+                animate={{
+                  boxShadow: `0 0 40px rgba(213, 55, 11, 0.5)`,
                 }}
-                className="absolute"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  translateX: "-50%",
-                  translateY: "-50%",
-                }}
+                transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
+                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm z-30"
               >
+                ME
+              </motion.div>
+
+              {careerData.map((planet, index) => (
+                <motion.div
+                  key={planet.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="w-full"
+                >
+                  {/* Connection line */}
+                  <div className="flex justify-center mb-2">
+                    <div className="w-1 h-6 bg-gradient-to-b from-accent/50 to-accent/20" />
+                  </div>
+
+                  {/* Mobile Card */}
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative">
+                    <div className="flex flex-col items-center">
+                      {/* Planet */}
+                      <div className="relative mb-4">
+                        <div
+                          className="rounded-full opacity-30 blur-lg"
+                          style={{
+                            backgroundColor: planet.color,
+                            width: planet.size * 0.8,
+                            height: planet.size * 0.8,
+                          }}
+                        />
+                        <motion.div
+                          className="absolute inset-0 rounded-full flex items-center justify-center text-white shadow-xl border-2 border-white/30"
+                          style={{
+                            width: planet.size * 0.8,
+                            height: planet.size * 0.8,
+                            backgroundColor: planet.color,
+                          }}
+                          animate={{ y: [0, -4, 0] }}
+                          transition={{
+                            duration: 3 + index * 0.3,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: "easeInOut",
+                          }}
+                        >
+                          {planet.icon}
+                        </motion.div>
+                      </div>
+
+                      {/* Card Info */}
+                      <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg p-4 w-full max-w-sm">
+                        <h3 className="text-lg font-bold text-center mb-1">{planet.title}</h3>
+                        {planet.subtitle && (
+                          <p className="text-sm text-accent font-semibold text-center mb-2">{planet.subtitle}</p>
+                        )}
+                        <p className="text-sm text-accent text-center mb-3">{planet.years}</p>
+                        <p className="text-sm font-semibold text-center mb-2">{planet.focus}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed text-center">{planet.achievement}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            /* Desktop Orbit Layout */
+            <>
+              {/* Planets arranged in orbit */}
+              {careerData.map((planet, index) => {
+                return (
+                  <motion.div
+                    key={planet.id}
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileInView={{ opacity: 1, scale: 1, x: planet.x, y: planet.y }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{
+                      duration: 0.6,
+                      delay: index * 0.1,
+                    }}
+                    className="absolute"
+                    style={{
+                      left: "50%",
+                      top: "50%",
+                      translateX: "-50%",
+                      translateY: "-50%",
+                    }}
+                  >
                 {/* Planet */}
                 <motion.div
                   animate={{
@@ -200,11 +282,11 @@ export function CareerTimeline() {
                   </motion.div>
                 </motion.div>
               </motion.div>
-            )
-          })}
+                )
+              })}
 
-          {/* Connection lines between planets */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              {/* Connection lines between planets */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
             <defs>
               <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="rgba(213, 55, 11, 0.4)" />
@@ -239,7 +321,9 @@ export function CareerTimeline() {
                 />
               )
             })}
-          </svg>
+              </svg>
+            </>
+          )}
         </div>
       </div>
     </section>

@@ -8,44 +8,56 @@ import * as THREE from "three"
 
 function Particles({ scrollProgress }: { scrollProgress: number }) {
   const particlesRef = useRef<THREE.Points>(null)
-  const particleCount = 50
+  const particleCount = Math.floor(80 * scrollProgress) // Density synced to scroll progress
   
   const positions = useRef(
     new Float32Array(
-      Array.from({ length: particleCount * 3 }, () => (Math.random() - 0.5) * 4)
+      Array.from({ length: 80 * 3 }, () => (Math.random() - 0.5) * 4)
     )
   )
   
   const velocities = useRef(
     new Float32Array(
-      Array.from({ length: particleCount * 3 }, () => Math.random() * 0.02 + 0.01)
+      Array.from({ length: 80 * 3 }, () => Math.random() * 0.03 + 0.015)
     )
   )
+  
+  const settled = useRef(new Array(80).fill(false))
 
   useFrame(() => {
     if (!particlesRef.current) return
     
     const posArray = particlesRef.current.geometry.attributes.position.array as Float32Array
     
-    for (let i = 0; i < particleCount; i++) {
+    for (let i = 0; i < 80; i++) {
       const i3 = i * 3
       
-      // Particles fall down and accumulate based on scroll progress
-      if (scrollProgress < 0.95) {
-        posArray[i3 + 1] -= velocities.current[i3 + 1] * (1 - scrollProgress)
+      // Show/hide particles based on scroll progress
+      if (i > particleCount) {
+        posArray[i3] = (Math.random() - 0.5) * 4
+        posArray[i3 + 1] = 2
+        posArray[i3 + 2] = (Math.random() - 0.5) * 4
+        settled.current[i] = false
+        continue
+      }
+      
+      if (!settled.current[i]) {
+        // Particles fall down
+        posArray[i3 + 1] -= velocities.current[i3 + 1]
         
-        // Reset particle to top if it falls too low
+        // Accumulate at bottom when scroll is near end
+        if (scrollProgress > 0.85 && posArray[i3 + 1] < 0) {
+          posArray[i3 + 1] = Math.max(posArray[i3 + 1], -1.5)
+          settled.current[i] = true
+        }
+        
+        // Reset particle if it falls too far
         if (posArray[i3 + 1] < -2) {
           posArray[i3 + 1] = 2
           posArray[i3] = (Math.random() - 0.5) * 4
           posArray[i3 + 2] = (Math.random() - 0.5) * 4
+          settled.current[i] = false
         }
-      } else {
-        // At bottom, particles settle in center
-        const targetX = (Math.random() - 0.5) * 0.5
-        const targetY = (Math.random() - 0.5) * 0.5
-        posArray[i3] += (targetX - posArray[i3]) * 0.1
-        posArray[i3 + 1] += (targetY - posArray[i3 + 1]) * 0.1
       }
     }
     
@@ -57,16 +69,16 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particleCount}
+          count={80}
           array={positions.current}
           itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.05}
+        size={0.08}
         color="#d5370b"
         transparent
-        opacity={0.8}
+        opacity={0.9}
         sizeAttenuation
       />
     </points>
@@ -102,16 +114,19 @@ export function BackToTop() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      className="fixed bottom-8 left-8 z-50"
+      className="fixed bottom-8 right-8 z-50"
     >
       <button
         onClick={scrollToTop}
-        className="relative w-14 h-14 rounded-full overflow-hidden backdrop-blur-sm border-2 border-accent/40 hover:border-accent transition-all duration-300 group"
+        className="relative w-16 h-16 rounded-full overflow-hidden backdrop-blur-sm border-2 border-accent/40 hover:border-accent transition-all duration-300 group"
         aria-label="Back to top"
         style={{
           background: scrollProgress >= 0.95 
-            ? 'rgba(213, 55, 11, 0.9)' 
-            : 'rgba(38, 48, 68, 0.6)'
+            ? 'radial-gradient(circle, rgba(213, 55, 11, 1) 0%, rgba(213, 55, 11, 0.85) 100%)' 
+            : 'rgba(38, 48, 68, 0.6)',
+          boxShadow: scrollProgress >= 0.95 
+            ? '0 0 30px rgba(213, 55, 11, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+            : '0 0 10px rgba(213, 55, 11, 0.3)'
         }}
       >
         {/* 3D Canvas Background */}
@@ -121,10 +136,31 @@ export function BackToTop() {
           </Canvas>
         </div>
         
+        {/* Glow Layer */}
+        <motion.div
+          className="absolute inset-0 rounded-full opacity-0"
+          animate={
+            scrollProgress >= 0.85
+              ? {
+                  boxShadow: [
+                    "0 0 0px rgba(213, 55, 11, 0)",
+                    "0 0 20px rgba(213, 55, 11, 0.6)",
+                    "0 0 0px rgba(213, 55, 11, 0)",
+                  ],
+                }
+              : {}
+          }
+          transition={{
+            duration: 1.5,
+            repeat: scrollProgress >= 0.85 ? Infinity : 0,
+            ease: "easeInOut",
+          }}
+        />
+        
         {/* Arrow Icon */}
         <div className="relative z-10 flex items-center justify-center w-full h-full">
           <ArrowUp 
-            className="w-5 h-5 transition-transform group-hover:-translate-y-1" 
+            className="w-6 h-6 transition-transform group-hover:-translate-y-1" 
             style={{ 
               color: scrollProgress >= 0.95 ? '#ffffff' : '#d5370b' 
             }}
