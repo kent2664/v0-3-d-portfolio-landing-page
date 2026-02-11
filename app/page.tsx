@@ -10,6 +10,7 @@ import { ThreeDBackground } from "@/components/3d-background"
 import { WarpLoading } from "@/components/warp-loading"
 import { GalleryIntro } from "@/components/gallery-intro"
 import { CareerTimeline } from "@/components/career-timeline"
+import { BackToTop } from "@/components/back-to-top"
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function Home() {
@@ -65,6 +66,7 @@ export default function Home() {
           <GalleryIntro onCinematicTrigger={handleCinematicTrigger} />
           <Contact />
         </main>
+        <BackToTop />
       </motion.div>
     </div>
   )

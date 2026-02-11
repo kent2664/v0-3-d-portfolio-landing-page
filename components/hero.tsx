@@ -16,6 +16,17 @@ export function Hero() {
     container.scrollLeft += e.deltaY
   }, [])
 
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const href = e.currentTarget.getAttribute('href')
+    if (href?.startsWith('#')) {
+      e.preventDefault()
+      const element = document.querySelector(href)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }
+
   return (
     <section id="about" className="relative flex min-h-screen items-center justify-center px-6 py-20">
       <div className="w-full text-center relative z-10">
@@ -50,18 +61,24 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <a
+          <motion.a
             href="#projects"
-            className="rounded-lg bg-accent px-8 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
+            onClick={handleSmoothScroll}
+            className="rounded-lg bg-accent px-8 py-3 font-medium text-accent-foreground transition-all hover:bg-accent/90 shadow-sm"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(213, 55, 11, 0.4)" }}
+            whileTap={{ scale: 0.98 }}
           >
             View My Work
-          </a>
-          <a
+          </motion.a>
+          <motion.a
             href="#contact"
-            className="rounded-lg border-2 border-accent/40 bg-accent/5 px-8 py-3 font-medium text-foreground transition-all hover:bg-accent/10 hover:border-accent/60"
+            onClick={handleSmoothScroll}
+            className="rounded-lg border-2 border-accent/40 bg-accent/5 px-8 py-3 font-medium text-foreground transition-all hover:bg-accent/10 hover:border-accent/60 shadow-sm"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(213, 55, 11, 0.3)" }}
+            whileTap={{ scale: 0.98 }}
           >
             Get In Touch
-          </a>
+          </motion.a>
         </motion.div>
 
         <div className="mt-20 space-y-6 pt-12">
@@ -75,13 +92,13 @@ export function Hero() {
 
           {/* Experience Cards - Horizontal Scroll with Gradient Mask */}
           <div
-            className="relative"
+            className="relative group/container"
             style={{
               maskImage: "linear-gradient(to right, black 85%, transparent 100%)",
               WebkitMaskImage: "linear-gradient(to right, black 85%, transparent 100%)",
             }}
           >
-            <div
+            <motion.div
               ref={scrollContainerRef}
               onWheel={handleWheel}
               data-scroll-hide
@@ -91,6 +108,8 @@ export function Hero() {
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
               }}
+              whileHover={{ x: -20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
               <style>{`
                 [data-scroll-hide]::-webkit-scrollbar {
@@ -100,15 +119,15 @@ export function Hero() {
 
               {/* Development Lead Experience Card */}
               <motion.div
-                className="relative group flex-shrink-0 w-80"
+                className="relative group flex-shrink-0 w-80 h-48"
                 initial={{ opacity: 0, x: 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0, ease: "easeOut" }}
                 viewport={{ once: true, margin: "-50px" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
-                  <div className="flex items-start gap-4">
+                <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300 h-full flex flex-col">
+                  <div className="flex items-start gap-4 flex-1">
                     <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
                       <span className="text-lg">👨‍💼</span>
                     </div>
@@ -125,15 +144,15 @@ export function Hero() {
 
               {/* Internal Business Tools Card */}
               <motion.div
-                className="relative group flex-shrink-0 w-80"
+                className="relative group flex-shrink-0 w-80 h-48"
                 initial={{ opacity: 0, x: 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
                 viewport={{ once: true, margin: "-50px" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
-                  <div className="flex items-start gap-4">
+                <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300 h-full flex flex-col">
+                  <div className="flex items-start gap-4 flex-1">
                     <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
                       <span className="text-lg">⚙️</span>
                     </div>
@@ -149,15 +168,15 @@ export function Hero() {
 
               {/* Passionate tech stack Card */}
               <motion.div
-                className="relative group flex-shrink-0 w-80"
+                className="relative group flex-shrink-0 w-80 h-48"
                 initial={{ opacity: 0, x: 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
                 viewport={{ once: true, margin: "-50px" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300">
-                  <div className="flex items-start gap-4">
+                <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300 h-full flex flex-col">
+                  <div className="flex items-start gap-4 flex-1">
                     <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
                       <span className="text-lg">🔥</span>
                     </div>
@@ -170,7 +189,31 @@ export function Hero() {
                   </div>
                 </div>
               </motion.div>
-            </div>
+
+              {/* NEW: Creativity & Logic Card */}
+              <motion.div
+                className="relative group flex-shrink-0 w-80 h-48"
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+                viewport={{ once: true, margin: "-50px" }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-6 hover:border-accent/30 transition-all duration-300 h-full flex flex-col">
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                      <span className="text-lg">🎨</span>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="font-bold text-foreground mb-2 tracking-tight">Creativity & Logic</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Combining a calm, analytical programming approach with an artistic design sense. Bridging the gap between clean code and visual excellence.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
