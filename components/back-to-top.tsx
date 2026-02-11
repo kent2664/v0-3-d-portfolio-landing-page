@@ -90,13 +90,11 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.85}
-        color="#ff7846"
+        size={0.08}
+        color="#d5370b"
         transparent
-        opacity={1}
+        opacity={0.9}
         sizeAttenuation
-        emissive="#ff7846"
-        emissiveIntensity={0.8}
       />
     </points>
   )
