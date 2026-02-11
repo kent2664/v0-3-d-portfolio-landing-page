@@ -1,0 +1,136 @@
+"use client"
+
+import { useEffect, useState, useRef } from "react"
+import { ArrowUp } from "lucide-react"
+import { Canvas, useFrame } from "@react-three/fiber"
+import { motion } from "framer-motion"
+import * as THREE from "three"
+
+function Particles({ scrollProgress }: { scrollProgress: number }) {
+  const particlesRef = useRef<THREE.Points>(null)
+  const particleCount = 50
+  
+  const positions = useRef(
+    new Float32Array(
+      Array.from({ length: particleCount * 3 }, () => (Math.random() - 0.5) * 4)
+    )
+  )
+  
+  const velocities = useRef(
+    new Float32Array(
+      Array.from({ length: particleCount * 3 }, () => Math.random() * 0.02 + 0.01)
+    )
+  )
+
+  useFrame(() => {
+    if (!particlesRef.current) return
+    
+    const posArray = particlesRef.current.geometry.attributes.position.array as Float32Array
+    
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3
+      
+      // Particles fall down and accumulate based on scroll progress
+      if (scrollProgress < 0.95) {
+        posArray[i3 + 1] -= velocities.current[i3 + 1] * (1 - scrollProgress)
+        
+        // Reset particle to top if it falls too low
+        if (posArray[i3 + 1] < -2) {
+          posArray[i3 + 1] = 2
+          posArray[i3] = (Math.random() - 0.5) * 4
+          posArray[i3 + 2] = (Math.random() - 0.5) * 4
+        }
+      } else {
+        // At bottom, particles settle in center
+        const targetX = (Math.random() - 0.5) * 0.5
+        const targetY = (Math.random() - 0.5) * 0.5
+        posArray[i3] += (targetX - posArray[i3]) * 0.1
+        posArray[i3 + 1] += (targetY - posArray[i3 + 1]) * 0.1
+      }
+    }
+    
+    particlesRef.current.geometry.attributes.position.needsUpdate = true
+  })
+
+  return (
+    <points ref={particlesRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={particleCount}
+          array={positions.current}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.05}
+        color="#d5370b"
+        transparent
+        opacity={0.8}
+        sizeAttenuation
+      />
+    </points>
+  )
+}
+
+export function BackToTop() {
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+      const currentScroll = window.scrollY
+      const progress = Math.min(currentScroll / scrollHeight, 1)
+      
+      setScrollProgress(progress)
+      setIsVisible(currentScroll > 300)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  if (!isVisible) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      className="fixed bottom-8 left-8 z-50"
+    >
+      <button
+        onClick={scrollToTop}
+        className="relative w-14 h-14 rounded-full overflow-hidden backdrop-blur-sm border-2 border-accent/40 hover:border-accent transition-all duration-300 group"
+        aria-label="Back to top"
+        style={{
+          background: scrollProgress >= 0.95 
+            ? 'rgba(213, 55, 11, 0.9)' 
+            : 'rgba(38, 48, 68, 0.6)'
+        }}
+      >
+        {/* 3D Canvas Background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+            <Particles scrollProgress={scrollProgress} />
+          </Canvas>
+        </div>
+        
+        {/* Arrow Icon */}
+        <div className="relative z-10 flex items-center justify-center w-full h-full">
+          <ArrowUp 
+            className="w-5 h-5 transition-transform group-hover:-translate-y-1" 
+            style={{ 
+              color: scrollProgress >= 0.95 ? '#ffffff' : '#d5370b' 
+            }}
+          />
+        </div>
+      </button>
+    </motion.div>
+  )
+}

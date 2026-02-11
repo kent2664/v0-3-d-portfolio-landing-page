@@ -28,12 +28,29 @@ export function GalleryIntro({ onCinematicTrigger }: { onCinematicTrigger?: () =
         </p>
         <motion.button
           onClick={handleExploreClick}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-8 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90 cursor-pointer"
+          className="relative inline-flex items-center gap-2 rounded-lg bg-accent px-8 py-3 font-medium text-accent-foreground cursor-pointer overflow-hidden group/btn"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
         >
-          Explore Gallery
-          <ArrowRight className="h-4 w-4" />
+          <motion.span
+            className="absolute inset-0 z-0"
+            initial={{
+              background: "linear-gradient(90deg, rgba(213, 55, 11, 1) 0%, rgba(213, 55, 11, 1) 100%)",
+            }}
+            whileHover={{
+              background: [
+                "linear-gradient(90deg, rgba(213, 55, 11, 1) 0%, rgba(255, 120, 70, 1) 0%, rgba(213, 55, 11, 1) 100%)",
+                "linear-gradient(90deg, rgba(213, 55, 11, 1) 0%, rgba(255, 120, 70, 1) 50%, rgba(213, 55, 11, 1) 100%)",
+                "linear-gradient(90deg, rgba(213, 55, 11, 1) 0%, rgba(255, 120, 70, 1) 100%, rgba(213, 55, 11, 1) 100%)",
+              ],
+            }}
+            transition={{
+              duration: 0.8,
+              ease: "easeInOut",
+            }}
+          />
+          <span className="relative z-10">Explore Gallery</span>
+          <ArrowRight className="h-4 w-4 relative z-10" />
         </motion.button>
       </div>
     </section>

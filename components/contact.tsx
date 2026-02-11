@@ -1,8 +1,16 @@
+"use client"
+
 import { Download } from "lucide-react"
+import { motion } from "framer-motion"
+import { useInView } from "framer-motion"
+import { useRef } from "react"
 
 export function Contact() {
+  const sectionRef = useRef(null)
+  const isInView = useInView(sectionRef, { once: false, margin: "-100px" })
+
   return (
-    <section id="contact" className="px-6 py-20 border-t border-[#664903]">
+    <section id="contact" className="px-6 py-20 border-t border-[#664903]" ref={sectionRef}>
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">Get In Touch</h2>
         <h3 className="mb-8 text-3xl font-bold">Let's Work Together</h3>
@@ -14,12 +22,48 @@ export function Contact() {
 
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="flex flex-col gap-4 sm:flex-row">
-            <a
+            <motion.a
               href="mailto:onz0shi2664@gmail.com"
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90"　target="_blank"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90 relative overflow-hidden"
+              target="_blank"
+              animate={
+                isInView
+                  ? {
+                      boxShadow: [
+                        "0 0 0px rgba(213, 55, 11, 0)",
+                        "0 0 20px rgba(213, 55, 11, 0.6)",
+                        "0 0 0px rgba(213, 55, 11, 0)",
+                      ],
+                    }
+                  : {}
+              }
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             >
-              Send Email
-            </a>
+              <motion.span
+                className="absolute inset-0 rounded-lg"
+                animate={
+                  isInView
+                    ? {
+                        background: [
+                          "radial-gradient(circle at 50% 50%, rgba(213, 55, 11, 0.3) 0%, transparent 50%)",
+                          "radial-gradient(circle at 50% 50%, rgba(213, 55, 11, 0.5) 0%, transparent 60%)",
+                          "radial-gradient(circle at 50% 50%, rgba(213, 55, 11, 0.3) 0%, transparent 50%)",
+                        ],
+                      }
+                    : {}
+                }
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <span className="relative z-10">Send Email</span>
+            </motion.a>
             <a
               href="https://drive.google.com/file/d/1DFb8hga8HNodI8-EHrZtWLei3rTMIAU1/view?usp=sharing"
               download="KentaYusa_Resume.pdf"
