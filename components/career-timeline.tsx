@@ -5,7 +5,6 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { Building2, Users, Briefcase } from "lucide-react"
-import { useMediaQuery } from "@/hooks/use-mobile"
 
 interface Planet {
   id: number
@@ -73,7 +72,19 @@ const careerData: Planet[] = [
 export function CareerTimeline() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 768px)")
+    setIsMobile(mediaQuery.matches)
+
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches)
+    }
+
+    mediaQuery.addEventListener("change", handleMediaChange)
+    return () => mediaQuery.removeEventListener("change", handleMediaChange)
+  }, [])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
