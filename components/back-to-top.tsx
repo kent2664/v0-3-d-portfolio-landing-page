@@ -8,35 +8,46 @@ import * as THREE from "three"
 
 function Particles({ scrollProgress }: { scrollProgress: number }) {
   const particlesRef = useRef<THREE.Points>(null)
-  const particleCount = Math.floor(80 * scrollProgress) // Density synced to scroll progress
+  const maxParticles = 40 // Reduced from 80 for better spacing with larger particles
+  const particleCount = Math.floor(maxParticles * scrollProgress) // Density synced to scroll progress
   
   const positions = useRef(
     new Float32Array(
-      Array.from({ length: 80 * 3 }, () => (Math.random() - 0.5) * 4)
+      Array.from({ length: maxParticles * 3 }, (_, i) => {
+        // Initialize Y position from top (1.5 to 2.0) instead of spread across entire space
+        if (i % 3 === 1) return 1.8 + Math.random() * 0.4
+        // Constrain X and Z to button viewport (-1.2 to 1.2)
+        return (Math.random() - 0.5) * 2.4
+      })
     )
   )
   
   const velocities = useRef(
     new Float32Array(
-      Array.from({ length: 80 * 3 }, () => Math.random() * 0.03 + 0.015)
+      Array.from({ length: maxParticles * 3 }, (_, i) => {
+        // Only Y velocity matters (falling down)
+        if (i % 3 === 1) return Math.random() * 0.025 + 0.015
+        return 0
+      })
     )
   )
   
-  const settled = useRef(new Array(80).fill(false))
+  const settled = useRef(new Array(maxParticles).fill(false))
 
   useFrame(() => {
     if (!particlesRef.current) return
     
     const posArray = particlesRef.current.geometry.attributes.position.array as Float32Array
     
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < maxParticles; i++) {
       const i3 = i * 3
       
       // Show/hide particles based on scroll progress
       if (i > particleCount) {
-        posArray[i3] = (Math.random() - 0.5) * 4
-        posArray[i3 + 1] = 2
-        posArray[i3 + 2] = (Math.random() - 0.5) * 4
+        // Inactive particles stay at top
+        posArray[i3] = (Math.random() - 0.5) * 2.4
+        posArray[i3 + 1] = 1.8
+        posArray[i3 + 2] = (Math.random() - 0.5) * 2.4
         settled.current[i] = false
         continue
       }
@@ -45,17 +56,21 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
         // Particles fall down
         posArray[i3 + 1] -= velocities.current[i3 + 1]
         
+        // Constrain X and Z to stay within button bounds
+        if (Math.abs(posArray[i3]) > 1.2) posArray[i3] *= 0.95
+        if (Math.abs(posArray[i3 + 2]) > 1.2) posArray[i3 + 2] *= 0.95
+        
         // Accumulate at bottom when scroll is near end
-        if (scrollProgress > 0.85 && posArray[i3 + 1] < 0) {
-          posArray[i3 + 1] = Math.max(posArray[i3 + 1], -1.5)
+        if (scrollProgress > 0.85 && posArray[i3 + 1] < -0.5) {
+          posArray[i3 + 1] = Math.max(posArray[i3 + 1], -1.2)
           settled.current[i] = true
         }
         
         // Reset particle if it falls too far
-        if (posArray[i3 + 1] < -2) {
-          posArray[i3 + 1] = 2
-          posArray[i3] = (Math.random() - 0.5) * 4
-          posArray[i3 + 2] = (Math.random() - 0.5) * 4
+        if (posArray[i3 + 1] < -1.5) {
+          posArray[i3 + 1] = 1.8 + Math.random() * 0.4
+          posArray[i3] = (Math.random() - 0.5) * 2.4
+          posArray[i3 + 2] = (Math.random() - 0.5) * 2.4
           settled.current[i] = false
         }
       }
@@ -69,17 +84,19 @@ function Particles({ scrollProgress }: { scrollProgress: number }) {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={80}
+          count={maxParticles}
           array={positions.current}
           itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.08}
-        color="#d5370b"
+        size={0.85}
+        color="#ff7846"
         transparent
-        opacity={0.9}
+        opacity={1}
         sizeAttenuation
+        emissive="#ff7846"
+        emissiveIntensity={0.8}
       />
     </points>
   )
